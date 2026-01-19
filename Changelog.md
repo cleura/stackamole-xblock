@@ -1,4 +1,4 @@
-Unreleased
+Version 8.5.3 (2026-01-19)
 -------------------------
 
 * Point release to mark the GitHub repository move.
