@@ -69,7 +69,7 @@ setup(
         'oslo.utils<=7.4',
         'oslo.config<=9.7.1',
         'oslo.i18n<6.6',
-        'paramiko>=3.5.0,<4',
+        'paramiko>=4.0,<4.1',
         'python-heatclient<=4.0',
         'python-keystoneclient<=5.5',
         'python-novaclient<=18.7',

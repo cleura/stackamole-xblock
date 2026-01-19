@@ -1,3 +1,7 @@
+Unreleased
+-------------------------
+* [Enhancement] Update requirements for Open edX Ulmo release.
+
 Version 8.5.3 (2026-01-19)
 -------------------------
 
