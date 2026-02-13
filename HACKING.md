@@ -69,13 +69,13 @@ Push these two commits (the one for the changelog, and the version
 bump) to `origin`. Make sure you push the `v<num>` tag to `origin` as
 well.
 
-Then, build a new `sdist` package, and [upload it to
+Then, build a new `sdist` package (with [build](https://pypi.org/project/build/)), and [upload it to
 PyPI](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives)
 (with [twine](https://packaging.python.org/key_projects/#twine)):
 
 ```bash
 rm dist/* -f
-./setup.py sdist
+python -m build --sdist
 twine upload dist/*
 ```
 

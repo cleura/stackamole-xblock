@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm[toml]>=7"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hastexo-xblock"
+dynamic = ["version"]
+dependencies = [
+    "apscheduler<4",
+    "cliff<=4.7",
+    "dogpile.cache<=1.3",
+    "google-api-python-client<=2.167.0",
+    "keystoneauth1<=5.8",
+    "openstacksdk<=4.1",
+    "osc-lib<=3.1",
+    "os-client-config<=2.1",
+    "oslo.serialization<=5.5",
+    "oslo.utils<=7.4",
+    "oslo.config<=9.7.1",
+    "oslo.i18n<6.6",
+    "paramiko>=4.0,<4.1",
+    "python-heatclient<=4.0",
+    "python-keystoneclient<=5.5",
+    "python-novaclient<=18.7",
+    "tenacity<=9.0",
+    "XBlock>=5.2,<6"
+]
+requires-python = ">=3.11"
+description = "hastexo XBlock: Makes arbitrarily complex lab environments available on an Open edX LMS"
+readme = {file = "README.md", content-type = "text/markdown"}
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: OpenStack",
+    "Framework :: Django",
+    "Intended Audience :: Education",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Education :: Computer Aided Instruction (CAI)",
+    "Topic :: Education",
+]
+
+[project.urls]
+Repository = "https://github.com/cleura/hastexo-xblock"
+
+[project.entry-points."xblock.v1"]
+hastexo = "hastexo.hastexo:HastexoXBlock"
+
+[tool.setuptools_scm]
+
+[tool.setuptools]
+packages = { find = {} }
+
+[tool.setuptools.package-data]
+hastexo_xblock = [
+  "static/**",
+  "public/**",
+  "translations/**",
+  "locale/**",
+]
