@@ -74,6 +74,7 @@ setup(
         'python-keystoneclient<=5.5',
         'python-novaclient<=18.7',
         'tenacity<=9.0',
+        'XBlock>=5.2,<6',
     ],
     entry_points={
         'xblock.v1': [
