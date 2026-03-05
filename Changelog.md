@@ -1,3 +1,9 @@
+Unreleased
+-------------------------
+* [Enhancement] Add an extra confirmation step to resetting
+  a lab. The learner now needs to type in a generated code
+  to confirm their lab reset.
+
 Version 8.6.0 (2026-02-16)
 -------------------------
 * [Enhancement] Update requirements for Open edX Ulmo release.

@@ -94,8 +94,12 @@ msgid ""
 msgstr "Ajastatud eksami käigus, taimer töötab keskkonna taastamise ajal edasi."
 
 #: static/html/main.html:82
-msgid "After you reset, you will need to retrace your steps up to this point."
-msgstr "Peale taastamist pead kõik oma senised sammud kuni praeguseni uuesti läbima."
+msgid ""
+"After you reset, you will need to retrace your steps up to this point. This "
+"includes redoing any previous labs you have already completed."
+msgstr ""
+"Peale taastamist pead kõik oma senised sammud kuni praeguseni uuesti läbima. See "
+"hõlmab ka kõigi juba varasemalt sooritatud laborite kordamist."
 
 #: static/html/main.html:84
 msgid "You cannot undo this action."
@@ -150,3 +154,7 @@ msgstr "Sinu laborikeskkonna ettevalmistamisel esines tõrge:"
 #: public/js/main.js:385
 msgid "You completed {passed} out of {total} tasks."
 msgstr "Läbisid edukalt {passed} ülesannet {total}-st."
+
+#: public/js/main.js:448
+msgid "Type {code} to reset your lab."
+msgstr "Trüki {code} laborikeskkonna taastamiseks."

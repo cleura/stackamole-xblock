@@ -93,8 +93,12 @@ msgid ""
 msgstr "En un examen cronometrado, el cronómetro seguirá funcionando mientras se restablece su entorno."
 
 #: static/html/main.html:82
-msgid "After you reset, you will need to retrace your steps up to this point."
-msgstr "Después de reiniciar, deberá volver sobre sus pasos hasta este punto."
+msgid ""
+"After you reset, you will need to retrace your steps up to this point. This "
+"includes redoing any previous labs you have already completed."
+msgstr ""
+"Después de reiniciar, deberá volver sobre sus pasos hasta este punto. "
+"Esto incluye volver a realizar cualquier laboratorio anterior que ya hayas completado."
 
 #: static/html/main.html:84
 msgid "You cannot undo this action."
@@ -149,3 +153,7 @@ msgstr "Hubo un problema al preparar su entorno de laboratorio:"
 #: public/js/main.js:385
 msgid "You completed {passed} out of {total} tasks."
 msgstr "Has completado {passed} de {total} tareas."
+
+#: public/js/main.js:448
+msgid "Type {code} to reset your lab."
+msgstr "Escribe {code} para reiniciar tu laboratorio."

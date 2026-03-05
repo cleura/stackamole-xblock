@@ -94,7 +94,9 @@ msgid ""
 msgstr ""
 
 #: static/html/main.html:82
-msgid "After you reset, you will need to retrace your steps up to this point."
+msgid ""
+"After you reset, you will need to retrace your steps up to this point. This "
+"includes redoing any previous labs you have already completed."
 msgstr ""
 
 #: static/html/main.html:84
@@ -149,4 +151,8 @@ msgstr ""
 
 #: public/js/main.js:385
 msgid "You completed {passed} out of {total} tasks."
+msgstr ""
+
+#: public/js/main.js:448
+msgid "Type {code} to reset your lab."
 msgstr ""

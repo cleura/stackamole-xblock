@@ -438,6 +438,27 @@ function HastexoXBlock(runtime, element, configuration) {
     var reset_dialog = function() {
         var dialog = $('#reset_dialog');
 
+        function generateCode() {
+            return Math.random().toString(36).substring(2, 7).toUpperCase();
+        }
+
+        var code = generateCode();
+        var reset_code_message = gettext(
+            // {code} is to be replaced, do not translate.
+            "Type {code} to reset your lab.").replace('{code}', '<strong>' + code + '</strong>');
+        dialog.find('#reset_code_message').html(reset_code_message);
+
+        dialog.find('#reset_code_input').val('');
+
+        /* disable reset initially */
+        dialog.find('input.reset').prop('disabled', true);
+
+        /* check typed code */
+        dialog.find('#reset_code_input').on('input', function() {
+            var typed = $(this).val().toUpperCase();
+            dialog.find('input.reset').prop('disabled', typed !== code);
+        });
+
         /* add an extra warning text for timed exams */
         if ($(".exam-timer-clock")[0]){
             $('.exam-warning').css('display', 'inline-block');

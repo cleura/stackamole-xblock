@@ -7,11 +7,11 @@
   </div>
   <div class="buttons bar">
     <select class="port"></select>
+    <input type="button" value="Reset" class="reset" />
+    <input type="button" value="Check progress" class="check" />
     {% if enable_fullscreen %}
     <input type="button" value="Open in new window" class="launch"/>
     {% endif %}
-    <input type="button" value="Reset" class="reset" />
-    <input type="button" value="Check progress" class="check" />
   </div>
   <div class="dialog" id="launch_pending">
     <div class="inner">
@@ -79,11 +79,13 @@
         <span class="exam-warning">
         {% trans "In a timed exam, the timer will continue to run while your environment is being reset." %}</span>
         <br/>
-        {% trans "After you reset, you will need to retrace your steps up to this point." %}
+        {% trans "After you reset, you will need to retrace your steps up to this point. This includes redoing any previous labs you have already completed." %}
         <br/>
-        {% trans "You cannot undo this action." %}</p>
+        <strong>{% trans "You cannot undo this action." %}</strong></p>
+      <p id="reset_code_message"></p>
+      <p><input type="text" id="reset_code_input" placeholder="Enter code here"/></p>
       <p class="buttons">
-        <input type="button" class="reset" value="Reset" />
+        <input type="button" class="reset" value="Reset" disabled />
         <input type="button" class="cancel" value="Cancel" />
       </p>
     </div>

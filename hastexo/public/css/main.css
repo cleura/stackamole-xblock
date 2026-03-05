@@ -1,10 +1,15 @@
-.buttons {
-    text-align: right;
+.buttons.bar {
+    display: flex;
 }
 
 .buttons .check {
     color: blue;
     display: none;
+}
+
+.buttons.bar .reset {
+    color: red;
+    margin-right: auto;
 }
 
 .buttons .reset {
@@ -120,6 +125,10 @@
 
 .inner .exam-warning {
     display: none;
+}
+
+.inner #reset_code_input {
+    margin: 0.5em;
 }
 
 .hints_title {

@@ -93,8 +93,12 @@ msgid ""
 msgstr "In einer zeitlich beschränkten Prüfung läuft die Zeit während des Zurücksetzens weiter."
 
 #: static/html/main.html:82
-msgid "After you reset, you will need to retrace your steps up to this point."
-msgstr "Nach dem Zurücksetzen müssen alle Arbeitsschritte bis hierher wiederholt werden."
+msgid ""
+"After you reset, you will need to retrace your steps up to this point. This "
+"includes redoing any previous labs you have already completed."
+msgstr ""
+"Nach dem Zurücksetzen ist es nötig, alle bisherigen Schritte zu wiederholen. "
+"Dies beinhaltet die Wiederholung aller früheren, bereits fertiggestellten Übungen."
 
 #: static/html/main.html:84
 msgid "You cannot undo this action."
@@ -149,3 +153,7 @@ msgstr "Bei der Herstellung der Übungsumgebung ist ein Problem aufgetreten:"
 #: public/js/main.js:385
 msgid "You completed {passed} out of {total} tasks."
 msgstr "{passed} von insgesamt {total} Aufgaben wurden korrekt erfüllt."
+
+#: public/js/main.js:448
+msgid "Type {code} to reset your lab."
+msgstr "{code} eingeben, um die Übungsumgebung zurückzusetzen."
