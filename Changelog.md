@@ -1,4 +1,4 @@
-Unreleased
+Version 8.7.0 (2026-03-10)
 -------------------------
 * [Enhancement] Add an extra confirmation step to resetting
   a lab. The learner now needs to type in a generated code
