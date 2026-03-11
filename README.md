@@ -33,6 +33,7 @@ repository, you must select the appropriate one:
 | Redwood          | `>=18.0, <19` | `>=8.0`        | `master`      |
 | Sumac            | `>=19.0, <20` | `>=8.4`        | `master`      |
 | Teak             | `>=20.0, <21` | `>=8.5`        | `master`      |
+| Ulmo             | `>=21.0, <22` | `>=8.6`        | `master`      |
 
 Instructions for deploying this XBlock with Tutor can be found
 below, in the [Deployment with Tutor](#deployment-with-tutor)
