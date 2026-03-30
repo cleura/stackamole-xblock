@@ -6,7 +6,7 @@
 The hastexo [XBlock](https://xblock.readthedocs.org/en/latest/) is an
 [Open edX](https://open.edx.org/) API that integrates realistic lab
 environments into distributed computing courses. The hastexo XBlock
-allows students to access an OpenStack (or Google Cloud) environment
+allows students to access an OpenStack environment
 within an edX course.
 
 It leverages [Apache Guacamole](https://guacamole.incubator.apache.org/) as a
@@ -42,9 +42,9 @@ section.
 ## Purpose
 
 The hastexo XBlock orchestrates a virtual environment (a "stack") that runs on
-a private or public cloud (currently [OpenStack](https://www.openstack.org) or
-[Gcloud](https://cloud.google.com/)) using its orchestration engine. It
-provides a Secure Shell session directly within the courseware.
+a private or public cloud (currently [OpenStack](https://www.openstack.org)) 
+using its orchestration engine. It provides a Secure Shell session directly 
+within the courseware.
 
 Stack creation is idempotent, so a fresh stack will be spun up only if it does
 not already exist. An idle stack will auto-suspend after a configurable time
@@ -119,18 +119,19 @@ two steps:
          os_project_domain_name: ""
          os_region_name: ""
        provider2:
-         type: "gcloud"
-         gc_type: "service_account"
-         gc_project_id: ""
-         gc_private_key_id: ""
-         gc_private_key: ""
-         gc_client_email: ""
-         gc_client_id: ""
-         gc_auth_uri: ""
-         gc_token_uri: ""
-         gc_auth_provider_x509_cert_url: ""
-         gc_client_x509_cert_url: ""
-         gc_region_id: ""
+         type: "openstack"
+         os_auth_url: ""
+         os_auth_token: ""
+         os_username: ""
+         os_password: ""
+         os_user_id: ""
+         os_user_domain_id: ""
+         os_user_domain_name: ""
+         os_project_id: ""
+         os_project_name: ""
+         os_project_domain_id: ""
+         os_project_domain_name: ""
+         os_region_name: ""
      remote_exec_timeout: 300
      sleep_timeout: 10
      suspend_concurrency: 4
@@ -278,7 +279,7 @@ This is a brief explanation of each:
   parameters.  You must configure at least one, named "default".  The following
   is a list of supported parameters:
 
-    * `type`: The provider type.  Currently "openstack" or "gcloud".  Defaults
+    * `type`: The provider type.  Currently "openstack".  Defaults
       to "openstack" if not provided, for backwards-compatibility.
 
     The following apply to OpenStack only:
@@ -306,38 +307,6 @@ This is a brief explanation of each:
     * `os_project_domain_name`: OpenStack project domain name.
 
     * `os_region_name`: OpenStack region name.
-
-    The following apply to Gcloud only.  All values aside from region can be
-    obtained by creating a [service
-    account](https://console.developers.google.com/iam-admin/serviceaccounts)
-    and downloading the JSON-format key:
-
-    * `gc_deploymentmanager_api_version`: The deployment service api version.
-      (Default: "v2")
-
-    * `gc_compute_api_version`: The compute service api version. (Default: "v1")
-
-    * `gc_type`: The type of account, currently only `service_account`.
-
-    * `gc_project_id`: Gcloud project ID.
-
-    * `gc_private_key_id`: Gcloud private key ID.
-
-    * `gc_private_key`: Gcloud private key, in its entirety.
-
-    * `gc_client_email`: Gcloud client email.
-
-    * `gc_client_id`: Gcloud cliend ID.
-
-    * `gc_auth_uri`: Gcloud auth URI.
-
-    * `gc_token_uri`: Gcloud token URI.
-
-    * `gc_auth_provider_x509_cert_url`: Gcloud auth provider cert URL.
-
-    * `gc_client_x509_cert_url`: Gcloud client cert URL.
-
-    * `gc_region_id`: Gcloud region where labs will be launched.
 
 
 ## Creating an orchestration template for your course
@@ -441,55 +410,6 @@ Defining the outputs:
           - { get_resource: server2 }
     ```
 
-### Gcloud examples
-
-A sample Gcloud template is provided under `samples/gcloud/sample-template.yaml.jinja`.
-
-The Gcloud deployment manager cannot generate an SSH key or random password
-itself, so the XBlock will do it for you.  There's no need to generate them or
-provide outputs manually.  However, you do need to make use of the ones
-provided as properties:
-
-    ```
-    resources:
-      - name: {{ env["deployment"] }}-server
-        type: compute.v1.instance
-        properties:
-          metadata:
-           items:
-           - key: user-data
-             value: |
-               #cloud-config
-               users:
-                 - default
-                 - name: training
-                   gecos: Training User
-                   groups: users,adm
-                   ssh-authorized-keys:
-                     - ssh-rsa {{ properties["public_key"] }}
-                   lock-passwd: false
-                   shell: /bin/false
-                   sudo: ALL=(ALL) NOPASSWD:ALL
-               chpasswd:
-                 list: |
-                   training:{{ properties["password"] }}
-           runcmd:
-             - echo "exec /usr/bin/screen -xRR" >> /home/training/.profile
-             - echo {{ properties["private_key"] }} | base64 -d > /home/training/.ssh/id_rsa
-    ```
-
-Note that due to the fact that the deployment manager does not accept property
-values with multiple lines, the private key is base64-encoded.
-
-As for outputs, in a Gcloud template one needs only one:
-
-    ```
-    outputs:
-    - name: public_ip
-      value: $(ref.{{ env["deployment"] }}-server.networkInterfaces[0].accessConfigs[0].natIP)
-    ```
-
-
 ## Using the hastexo XBlock in a course
 
 To create a stack for a student and display a terminal window where invoked,
@@ -561,9 +481,8 @@ You can also use the following nested XML options:
   until encountering a launch failure, and "0" disables the provider).
   `template` is the content store path to the orchestration template (if not
   given, `stack_template_path` will be used).  `environment` specifies a
-  content store path to a either a Heat environment file, or, if using Gcloud,
-  a YAML list of properties.  If no providers are specified, the platform
-  default will be used.
+  content store path to a Heat environment file. If no providers are specified, 
+  the platform default will be used.
 
 * `ports`: A list of ports the user can manually choose to connect to.  This is
   intended as a means of providing a way to connect directly to multiple VMs in
@@ -594,8 +513,8 @@ For example, in XML:
         environment: hot_lab1_env.yaml
       - name: provider2
         capacity: 30
-        template: gcloud_lab1_template.yaml
-        environment: gcloud_lab1_config.yaml
+        template: hot_lab2_template.yaml
+        environment: hot_lab2_env.yaml
     </option:providers>
     <option:ports>
       - name: server1

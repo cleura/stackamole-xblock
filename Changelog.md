@@ -1,3 +1,10 @@
+Unreleased
+-------------------------
+* Drop support for GCloud Provier. The Cloud Deployment Manager,
+  which the current implementation is based on, will reach end of 
+  support on March 31, 2026.
+  (https://docs.cloud.google.com/deployment-manager/docs)
+
 Version 8.7.0 (2026-03-10)
 -------------------------
 * [Enhancement] Add an extra confirmation step to resetting
