@@ -6,8 +6,8 @@ from heatclient import exc as heat_exc
 from keystoneauth1.exceptions import http as keystone_exc
 from novaclient import exceptions as nova_exc
 
-from hastexo.provider import (Provider, OpenstackProvider,
-                              ProviderException)
+from stackamole.provider import (Provider, OpenstackProvider,
+                                 ProviderException)
 
 
 HEAT_EXCEPTIONS = [
@@ -146,9 +146,9 @@ class TestOpenstackProvider(TestCase):
 
         # Patchers
         patchers = {
-            "HeatWrapper": patch("hastexo.provider.HeatWrapper"),
-            "NovaWrapper": patch("hastexo.provider.NovaWrapper"),
-            "settings": patch.dict("hastexo.common.DEFAULT_SETTINGS",
+            "HeatWrapper": patch("stackamole.provider.HeatWrapper"),
+            "NovaWrapper": patch("stackamole.provider.NovaWrapper"),
+            "settings": patch.dict("stackamole.common.DEFAULT_SETTINGS",
                                    self.settings),
         }
         self.mocks = {}
@@ -345,7 +345,7 @@ class TestOpenstackProvider(TestCase):
         provider = Provider.init(self.provider_name)
         keypair = provider.generate_key_pair(key_type=key_type)
 
-        with patch('hastexo.provider.Provider.generate_key_pair') \
+        with patch('stackamole.provider.Provider.generate_key_pair') \
                 as generate_mock:
 
             generate_mock.return_value = keypair

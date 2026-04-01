@@ -3,10 +3,10 @@ from django.test import TestCase
 
 from common.djangoapps.student.models import AnonymousUserId
 
-from hastexo.models import Stack, StackLog
+from stackamole.models import Stack, StackLog
 
 
-class TestHastexoModels(TestCase):
+class TestStackamoleModels(TestCase):
     def setUp(self):
         self.student_id = 'bogus_student_id'
         self.course_id = 'bogus_course_id'

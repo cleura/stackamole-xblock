@@ -1,6 +1,11 @@
 Unreleased
 -------------------------
 
+* [BREAKING CHANGE] Rename the XBlock from `hastexo` to `stackamole`.
+  This change includes a one way migration, renaming the tables from `hastexo-*` to `stackamole_*`.
+  Courses will remain to work as either `hastexo` or `stackamole` modules, until the `pyproject.toml` file includes both entrypoints.
+  All previously existing and new labs will be accessible at `<LMS>/admin/stackamole/stack`.
+  The steps for operators to migrate from the `hastexo` to the `stackamole` XBlock are defined in the `MIGRATION.md` file.
 * Drop support for GCloud Provider.
   The Cloud Deployment Manager, which the current implementation is based on, will reach end of support on March 31, 2026.
   (https://docs.cloud.google.com/deployment-manager/docs)

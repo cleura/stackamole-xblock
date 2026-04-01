@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Setup for hastexo XBlock."""
+"""Setup for Stackamole XBlock."""
 
 from setuptools import setup
 

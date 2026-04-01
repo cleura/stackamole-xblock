@@ -9,7 +9,7 @@ from pymongo.errors import (
     NetworkTimeout,
     ServerSelectionTimeoutError,
 )
-from hastexo.common import (
+from stackamole.common import (
     read_from_contentstore,
     ssh_to,
     remote_exec,
@@ -35,7 +35,7 @@ RETRY_SOCKET_ERRNOS = [
 
 
 @ddt.ddt
-class TestHastexoCommon(TestCase):
+class TestStackamoleCommon(TestCase):
     def setUp(self):
         self.settings = {
             "sleep_timeout": 0,
@@ -43,9 +43,9 @@ class TestHastexoCommon(TestCase):
         }
 
         patchers = {
-            "uuid": patch("hastexo.common.uuid"),
-            "paramiko": patch("hastexo.common.paramiko"),
-            "settings": patch.dict("hastexo.common.DEFAULT_SETTINGS",
+            "uuid": patch("stackamole.common.uuid"),
+            "paramiko": patch("stackamole.common.paramiko"),
+            "settings": patch.dict("stackamole.common.DEFAULT_SETTINGS",
                                    self.settings),
         }
 

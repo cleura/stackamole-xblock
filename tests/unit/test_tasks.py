@@ -4,15 +4,15 @@ import socket
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
-from hastexo.models import Stack
-from hastexo.provider import ProviderException
-from hastexo.common import (
+from stackamole.models import Stack
+from stackamole.provider import ProviderException
+from stackamole.common import (
     get_stack,
     update_stack,
     update_stack_fields,
     RemoteExecException,
 )
-from hastexo.tasks import (
+from stackamole.tasks import (
     LaunchStackTask,
     SuspendStackTask,
     DeleteStackTask,
@@ -24,7 +24,7 @@ from django.db.utils import OperationalError
 from django.utils import timezone
 
 
-class HastexoTestCase(TestCase):
+class StackamoleTestCase(TestCase):
     STACK_IP = "127.0.0.1"
     LONG_ERROR_MSG = (
         "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. "
@@ -136,14 +136,14 @@ class HastexoTestCase(TestCase):
 
         # Patchers
         patchers = {
-            "socket": patch("hastexo.tasks.socket"),
-            "Provider": patch("hastexo.tasks.Provider"),
-            "settings": patch.dict("hastexo.common.DEFAULT_SETTINGS",
+            "socket": patch("stackamole.tasks.socket"),
+            "Provider": patch("stackamole.tasks.Provider"),
+            "settings": patch.dict("stackamole.common.DEFAULT_SETTINGS",
                                    self.settings),
-            "ssh_to": patch("hastexo.tasks.ssh_to"),
+            "ssh_to": patch("stackamole.tasks.ssh_to"),
             "read_from_contentstore": patch(
-                "hastexo.tasks.read_from_contentstore"),
-            "remote_exec": patch("hastexo.tasks.remote_exec"),
+                "stackamole.tasks.read_from_contentstore"),
+            "remote_exec": patch("stackamole.tasks.remote_exec"),
         }
         self.mocks = {}
         for mock_name, patcher in patchers.items():
@@ -188,7 +188,7 @@ class HastexoTestCase(TestCase):
         stack.save()
 
 
-class TestLaunchStackTask(HastexoTestCase):
+class TestLaunchStackTask(StackamoleTestCase):
     def test_create_stack(self):
         # Setup
         provider = self.mock_providers[0]
@@ -258,7 +258,7 @@ class TestLaunchStackTask(HastexoTestCase):
         ]
 
         # Mock OperationalError 2 times with Stack.objects.filter()
-        with patch("hastexo.models.Stack.objects.filter") as filter_patch:
+        with patch("stackamole.models.Stack.objects.filter") as filter_patch:
             filter_patch.side_effect = [OperationalError,
                                         OperationalError,
                                         Stack.objects]
@@ -305,7 +305,7 @@ class TestLaunchStackTask(HastexoTestCase):
         ]
 
         # Mock OperationalError 3 times with Stack.objects.filter()
-        with patch("hastexo.models.Stack.objects.filter") as filter_patch:
+        with patch("stackamole.models.Stack.objects.filter") as filter_patch:
             filter_patch.side_effect = [OperationalError,
                                         OperationalError,
                                         OperationalError]
@@ -1586,7 +1586,7 @@ class TestLaunchStackTask(HastexoTestCase):
         provider.resume_stack.assert_not_called()
 
 
-class TestSuspendStackTask(HastexoTestCase):
+class TestSuspendStackTask(StackamoleTestCase):
     def test_suspend_up_stack(self):
         # Setup
         self.update_stack({
@@ -1856,7 +1856,7 @@ class TestSuspendStackTask(HastexoTestCase):
         self.assertIn('[...]', stack.error_msg)
 
 
-class TestDeleteStackTask(HastexoTestCase):
+class TestDeleteStackTask(StackamoleTestCase):
     def test_delete_suspended_stack(self):
         # Setup
         self.update_stack({
@@ -2188,7 +2188,7 @@ class TestDeleteStackTask(HastexoTestCase):
         self.assertEqual(stack.provider, self.providers[0]["name"])
 
 
-class TestCheckStudentProgressTask(HastexoTestCase):
+class TestCheckStudentProgressTask(StackamoleTestCase):
     def test_check_student_progress_failure(self):
         # Setup
         stderr_fail_1 = "single line"
@@ -2300,25 +2300,25 @@ class TestCheckStudentProgressTask(HastexoTestCase):
         ])
 
 
-class HastexoIPv6TestCase(HastexoTestCase):
+class StackamoleIPv6TestCase(StackamoleTestCase):
     STACK_IP = "::1"
 
 
 class TestLaunchStackTaskIPv6(TestLaunchStackTask,
-                              HastexoIPv6TestCase):
+                              StackamoleIPv6TestCase):
     pass
 
 
 class TestSuspendStackTaskIPv6(TestSuspendStackTask,
-                               HastexoIPv6TestCase):
+                               StackamoleIPv6TestCase):
     pass
 
 
 class TestDeleteStackTaskIPv6(TestDeleteStackTask,
-                              HastexoIPv6TestCase):
+                              StackamoleIPv6TestCase):
     pass
 
 
 class TestCheckStudentProgressTaskIPv6(TestCheckStudentProgressTask,
-                                       HastexoIPv6TestCase):
+                                       StackamoleIPv6TestCase):
     pass

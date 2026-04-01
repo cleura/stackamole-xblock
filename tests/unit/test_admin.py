@@ -20,11 +20,11 @@ try:
     from common.djangoapps.student.models import AnonymousUserId
 except RuntimeError:
     from student.models import AnonymousUserId
-from hastexo.admin import StackAdmin
-from hastexo.models import Stack, StackLog
+from stackamole.admin import StackAdmin
+from stackamole.models import Stack, StackLog
 
 
-class TestHastexoStackAdmin(TestCase):
+class TestStackamoleStackAdmin(TestCase):
     """
     Test class for StackAdmin
 
@@ -109,25 +109,26 @@ class TestHastexoStackAdmin(TestCase):
         self.assertEqual(stack.provider, "")
 
     def test_name_in_changelist(self):
-        response = self.client.get(reverse('admin:hastexo_stack_changelist'))
+        response = self.client.get(
+            reverse('admin:stackamole_stack_changelist'))
         self.assertContains(response, self.stack_name)
 
     def test_no_stack_providers_in_change_page(self):
         self.stack.providers = {}
         self.stack.save()
-        url = reverse('admin:hastexo_stack_change', args=(self.stack.id,))
+        url = reverse('admin:stackamole_stack_change', args=(self.stack.id,))
         response = self.client.get(url)
         self.assertNotContains(response, "provider3")
 
     def test_email_in_change_page(self):
-        url = reverse('admin:hastexo_stack_change', args=(self.stack.id,))
+        url = reverse('admin:stackamole_stack_change', args=(self.stack.id,))
         response = self.client.get(url)
         self.assertContains(response, self.email)
 
     def test_mark_suspended(self):
         data = {
             'action': 'mark_suspended', '_selected_action': [self.stack.id, ]}
-        url = reverse('admin:hastexo_stack_changelist')
+        url = reverse('admin:stackamole_stack_changelist')
         response = self.client.post(url, data, follow=True)
         self.assertEqual(response.status_code, 200)
 
@@ -138,7 +139,7 @@ class TestHastexoStackAdmin(TestCase):
     def test_mark_deleted(self):
         data = {
             'action': 'mark_deleted', '_selected_action': [self.stack.id, ]}
-        url = reverse('admin:hastexo_stack_changelist')
+        url = reverse('admin:stackamole_stack_changelist')
         response = self.client.post(url, data, follow=True)
         self.assertEqual(response.status_code, 200)
 
@@ -161,7 +162,7 @@ class TestHastexoStackAdmin(TestCase):
 
         data = {
             'action': 'clear_stacklog', '_selected_action': [self.stack.id, ]}
-        url = reverse('admin:hastexo_stack_changelist')
+        url = reverse('admin:stackamole_stack_changelist')
         response = self.client.post(url, data, follow=True)
         self.assertEqual(response.status_code, 200)
 

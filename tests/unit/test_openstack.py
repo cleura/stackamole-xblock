@@ -1,6 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch, Mock
-from hastexo.openstack import OpenStackWrapper, HeatWrapper, NovaWrapper
+from stackamole.openstack import OpenStackWrapper, HeatWrapper, NovaWrapper
 
 
 class TestOpenStackWrapper(TestCase):
@@ -20,10 +20,10 @@ class TestOpenStackWrapper(TestCase):
             "os_region_name": "bogus_region_name"
         }
         patchers = {
-            "generic": patch("hastexo.openstack.generic"),
-            "kssession": patch("hastexo.openstack.kssession"),
-            "heat_client": patch("hastexo.openstack.heat_client"),
-            "nova_client": patch("hastexo.openstack.nova_client")
+            "generic": patch("stackamole.openstack.generic"),
+            "kssession": patch("stackamole.openstack.kssession"),
+            "heat_client": patch("stackamole.openstack.heat_client"),
+            "nova_client": patch("stackamole.openstack.nova_client")
         }
         self.mocks = {}
         for mock_name, patcher in patchers.items():

@@ -1,45 +1,47 @@
-[![PyPI version](https://badge.fury.io/py/hastexo-xblock.svg)](https://pypi.python.org/pypi/hastexo-xblock)
-[![Build Status](https://github.com/cleura/hastexo-xblock/workflows/Python%20package/badge.svg)](https://github.com/cleura/hastexo-xblock/actions?query=workflow%3A%22Python+package%22) [![codecov](https://codecov.io/gh/cleura/hastexo-xblock/branch/master/graph/badge.svg)](https://codecov.io/gh/cleura/hastexo-xblock)
+[![PyPI version](https://badge.fury.io/py/stackamole-xblock.svg)](https://pypi.python.org/pypi/stackamole-xblock)
+[![Build Status](https://github.com/cleura/stackamole-xblock/workflows/Python%20package/badge.svg)](https://github.com/cleura/stackamole-xblock/actions?query=workflow%3A%22Python+package%22) [![codecov](https://codecov.io/gh/cleura/stackamole-xblock/branch/master/graph/badge.svg)](https://codecov.io/gh/cleura/stackamole-xblock)
 
-# hastexo XBlock
+# Stackamole XBlock
 
-The hastexo [XBlock](https://xblock.readthedocs.org/en/latest/) is an [Open edX](https://open.edx.org/) API that integrates realistic lab environments into distributed computing courses.
-The hastexo XBlock allows students to access an OpenStack environment within an edX course.
+The stackamole [XBlock](https://xblock.readthedocs.org/en/latest/) is an [Open edX](https://open.edx.org/) API that integrates realistic lab environments into distributed computing courses.
+The stackamole XBlock allows students to access an OpenStack environment within an edX course.
 
 It leverages [Apache Guacamole](https://guacamole.incubator.apache.org/) as a browser-based connection mechanism, which includes the ability to connect to graphical user environments (via VNC and RDP), in addition to terminals (via SSH).
 
-This repository was previously hosted under the `hastexo` GitHub organization, and moved to `cleura` in December 2025 as part of a routine repository consolidation.
+This repository was previously named the `hastexo-xblock`, and renamed to `stackamole-xblock` in May 2026.
+See [`MIGRATION.md`](MIGRATION.md) for migration notes.
 
 ## Version compatibility matrix
 
 You must install a supported release of this XBlock to match the Open edX and [Tutor](https://docs.tutor.overhang.io/) version you are deploying.
 If you are installing this plugin from a branch in this Git repository, you must select the appropriate one:
 
-| Open edX release | Tutor version | XBlock version | XBlock branch |
-|------------------|---------------|----------------|---------------|
-| Maple            | `>=13.2, <14` | `>=6.0, <7.0`  | `stable-6.0`  |
-| Nutmeg           | `>=14.0, <15` | `>=7.0, <8.0`  | `stable-7`    |
-| Olive            | `>=15.0, <16` | `>=7.5, <8.0`  | `stable-7`    |
-| Palm             | `>=16.0, <17` | `>=7.5, <8.0`  | `stable-7`    |
-| Quince           | `>=17.0, <18` | `>=7.9, <8.0`  | `stable-7`    |
-| Redwood          | `>=18.0, <19` | `>=8.0`        | `master`      |
-| Sumac            | `>=19.0, <20` | `>=8.4`        | `master`      |
-| Teak             | `>=20.0, <21` | `>=8.5`        | `master`      |
-| Ulmo             | `>=21.0, <22` | `>=8.6`        | `master`      |
+| Open edX release | Tutor version | XBlock version              | XBlock branch |
+|------------------|---------------|-----------------------------|---------------|
+| Maple            | `>=13.2, <14` | `hastexo-xblock>=6.0, <7.0` | `stable-6.0`  |
+| Nutmeg           | `>=14.0, <15` | `hastexo-xblock>=7.0, <8.0` | `stable-7`    |
+| Olive            | `>=15.0, <16` | `hastexo-xblock>=7.5, <8.0` | `stable-7`    |
+| Palm             | `>=16.0, <17` | `hastexo-xblock>=7.5, <8.0` | `stable-7`    |
+| Quince           | `>=17.0, <18` | `hastexo-xblock>=7.9, <8.0` | `stable-7`    |
+| Redwood          | `>=18.0, <19` | `hastexo-xblock>=8.0, <9.0` | `master`      |
+| Sumac            | `>=19.0, <20` | `hastexo-xblock>=8.4, <9.0` | `master`      |
+| Teak             | `>=20.0, <21` | `hastexo-xblock>=8.5, <9.0` | `master`      |
+| Ulmo             | `>=21.0, <22` | `hastexo-xblock>=8.6, <9.0` | `master`      |
+| Ulmo             | `>=21.0, <22` | `stackamole-xblock>=9.0`    | `main`        |
 
 Instructions for deploying this XBlock with Tutor can be found below, in the [Deployment with Tutor](#deployment-with-tutor) section.
 
 ## Purpose
 
-The hastexo XBlock orchestrates a virtual environment (a "stack") that runs on a private or public cloud (currently [OpenStack](https://www.openstack.org)) using its orchestration engine.
+The stackamole XBlock orchestrates a virtual environment (a "stack") that runs on a private or public cloud (currently [OpenStack](https://www.openstack.org)) using its orchestration engine.
 It provides a Secure Shell session directly within the courseware.
 
 Stack creation is idempotent, so a fresh stack will be spun up only if it does not already exist.
 An idle stack will auto-suspend after a configurable time period, which is two minutes by default.
 The stack will resume automatically when the student returns to the lab environment.
 
-Since public cloud environments typically charge by the minute to *run* virtual machines, the hastexo XBlock makes lab environments cost effective to deploy.
-The hastexo XBlock can run a fully distributed virtual lab environment for a course in [Ceph](http://ceph.com), OpenStack, or [Open vSwitch](http://openvswitch.org/) for approximately $25 per month on a public cloud (assuming students use the environment for 1 hour per day).
+Since public cloud environments typically charge by the minute to *run* virtual machines, the stackamole XBlock makes lab environments cost effective to deploy.
+The Stackamole XBlock can run a fully distributed virtual lab environment for a course in [Ceph](http://ceph.com), OpenStack, or [Open vSwitch](http://openvswitch.org/) for approximately $25 per month on a public cloud (assuming students use the environment for 1 hour per day).
 
 Course authors can fully define and customize the lab environment.
 It is only limited by the feature set of the cloud's deployment features.
@@ -55,15 +57,15 @@ Running this XBlock with Tutor (for Open edX Maple and later) requires two steps
    ```
    For additional information, please refer to the [official documentation](https://docs.tutor.overhang.io/configuration.html#installing-extra-xblocks-and-requirements).
 
-2. Install and enable the `tutor-contrib-hastexo` plugin:
-   ```shell
-   pip install git+https://github.com/cleura/tutor-contrib-hastexo
-   tutor plugins enable hastexo
+2. Install and enable the `tutor-contrib-stackamole` plugin:
+   ```
+   pip install git+https://github.com/cleura/tutor-contrib-stackamole
+   tutor plugins enable stackamole
    ```
    Add the necessary configurations to your Tutor `config.yml`.
-   Unless you want to change the default configurations, you'll only need to add the settings for the XBlock via `HASTEXO_XBLOCK_SETTINGS`, for example:
-   ```yaml
-   HASTEXO_XBLOCK_SETTINGS:
+   Unless you want to change the default configurations, you'll only need to add the settings for the XBlock via `STACKAMOLE_XBLOCK_SETTINGS`, for example:
+   ```
+   STACKAMOLE_XBLOCK_SETTINGS:
      check_timeout: 120
      delete_age: 0
      delete_attempts: 3
@@ -116,28 +118,28 @@ Running this XBlock with Tutor (for Open edX Maple and later) requires two steps
      terminal_color_scheme: white-black
      terminal_font_name: monospace
      terminal_font_size: '10'
-     terminal_url: /hastexo-xblock/
+     terminal_url: /stackamole-xblock/
    ```
    For more details about each setting, please refer to [the *XBlock settings* section](#xblock-settings) below.
 
-3. Before deploying services with Tutor, build the Docker image for the `hastexo` service, and also build a custom `openedx` image:
+3. Before deploying services with Tutor, build the Docker image for the `stackamole` service, and also build a custom `openedx` image:
    ```shell
-   tutor images build openedx hastexo
+   tutor images build openedx stackamole
    ```
-   For more information about the plugin configuration, please refer to [the plugin README](https://github.com/cleura/tutor-contrib-hastexo).
+   For more information about the plugin configuration, please refer to [the plugin README](https://github.com/cleura/tutor-contrib-stackamole).
 
-4. After you have deployed Open edX with Tutor, your platform is operational, and you have created a course in Open edX Studio, go to *Settings* → *Advanced Settings* and add the `hastexo` module to *Advanced Module List,* like so:
+4. After you have deployed Open edX with Tutor, your platform is operational, and you have created a course in Open edX Studio, go to *Settings* → *Advanced Settings* and add the `stackamole` module to *Advanced Module List,* like so:
    ```json
    [
     "annotatable",
     "openassessment",
-    "hastexo"
+    "stackamole"
    ]
    ```
 
 ## XBlock settings
 
-The hastexo XBlock must be configured via `XBLOCK_SETTINGS` in `lms.env.json` (or `lms.yml), under the `hastexo` key.
+The stackamole XBlock must be configured via `XBLOCK_SETTINGS` in `lms.env.json` (or `lms.yml`), under the `stackamole` key.
 At the very minimum, you must configure a single "default" provider with the credentials specific to the cloud you will be using.
 All other variables can be left at their defaults.
 
@@ -146,8 +148,8 @@ This is a brief explanation of each:
 * `terminal_url`: URL to the Guacamole web app.
   If it is defined with a fully qualified domain, it must include the protocol (`http://` or `https://`).
   If not, it is assumed to be an absolute path based on the current `window.location`.
-  (It is possible to define it with a ":"-prefixed port, such as ":8080/hastexo-xblock/", for use in devstacks).
-  (Default: `/hastexo-xblock/`)
+  (It is possible to define it with a ":"-prefixed port, such as ":8080/stackamole-xblock/", for use in devstacks).
+  (Default: `/stackamole-xblock/`)
 
 * `terminal_color_scheme`: Color scheme for the terminal window.
   Suitable values are described in [Guacamole Documentation](https://guacamole.apache.org/doc/gug/configuring-guacamole.html#ssh).
@@ -272,7 +274,7 @@ This is a brief explanation of each:
 
 ## Creating an orchestration template for your course
 
-To use the hastexo XBlock, start by creating an orchestration template and uploading it to the content store.
+To use the stackamole XBlock, start by creating an orchestration template and uploading it to the content store.
 The XBlock imposes some constraints on the template (detailed below), but you are otherwise free to customize your training environment as needed.
 
 To ensure your template has the required configuration:
@@ -363,9 +365,9 @@ outputs:
       - { get_resource: server2 }
 ```
 
-## Using the hastexo XBlock in a course
+## Using the Stackamole XBlock in a course
 
-To create a stack for a student and display a terminal window where invoked, you need to define the `hastexo` tag in your course content.
+To create a stack for a student and display a terminal window where invoked, you need to define the `stackamole` tag in your course content.
 It must be configured with the following attributes:
 
 * `stack_user_name`: The name of the user that the Xblock will use to connect to the environment, as specified in the orchestration template.
@@ -444,7 +446,7 @@ For example, in XML:
 
 ```xml
 <vertical url_name="lab_introduction">
-  <hastexo xmlns:option="http://code.edx.org/xblock/option"
+  <stackamole xmlns:option="http://code.edx.org/xblock/option"
     url_name="lab_introduction"
     stack_user_name="training"
     stack_protocol="rdp">
@@ -486,7 +488,7 @@ For example, in XML:
         fi
         exit 0
     ]]></option:tests>
-  </hastexo>
+  </stackamole>
 </vertical>
 ```
 
@@ -496,12 +498,12 @@ Defining it more than once per section is not supported.
 Note on tests: as seen in the above example, it is recommended to wrap them all in `<![CDATA[..]]>` tags.
 This avoids XML parsing errors when special characters are encountered, such as the `>&2` used to output to stderr in bash.
 
-In order to add the hastexo Xblock through Studio, open the unit where you want it to go.
+In order to add the stackamole Xblock through Studio, open the unit where you want it to go.
 Add a new component, select `Advanced`, then select the `Lab` component.
 This adds the XBlock.
 Edit the Settings as explained above.
 
-### Using the hastexo XBlock in a content library
+### Using the Stackamole XBlock in a content library
 
 This XBlock is usable in [content libraries](https://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/course_components/libraries.html).
 It supports adding lab instructions as child blocks, so that when the block is randomized, the instructions are bundled together with it.
@@ -519,17 +521,17 @@ If using OLX, html blocks can be defined separately in the `html` subdirectory a
 
 ```xml
 <vertical url_name="lab_introduction">
-  <hastexo ...>
+  <stackamole ...>
     <html url_name="lab_instructions">
-  </hastexo>
+  </stackamole>
 </vertical>
 ```
 
 Child blocks will always be rendered _above_ the terminal.
 
-### Using the hastexo XBlock while masquerading as a specific learner
+### Using the Stackamole XBlock while masquerading as a specific learner
 
-Instructors can use the hastexo XBlock lab environments when masquerading as a specific learner by using the "View this course as:" option in the LMS staff header.
+Instructors can use the stackamole XBlock lab environments when masquerading as a specific learner by using the "View this course as:" option in the LMS staff header.
 
 The learner will not know when an instructor is using their lab, so we advise to be mindful of the changes you make while the learner is active at the same lab.
 
@@ -537,18 +539,18 @@ This feature should be considered experimental, and is subject to future change 
 
 ## Student experience
 
-When students navigate to a unit with a hastexo XBlock in it, a new Heat stack will be created (or resumed) for them.
+When students navigate to a unit with a stackamole XBlock in it, a new Heat stack will be created (or resumed) for them.
 The Heat stack will be as defined in the uploaded Heat template.
 It is unique per student and per course run.
 If the same tag appears on a different course, or different run of the same course, the student will get a different stack.
 
-The stack will suspend if the student does not navigate to the `hastexo` unit in that section within the default two minutes (configurable via settings, as explained above).
-When the student gets to the `hastexo` unit, the stack will be resumed and they will be connected automatically and securely.
+The stack will suspend if the student does not navigate to the `stackamole` unit in that section within the default two minutes (configurable via settings, as explained above).
+When the student gets to the `stackamole` unit, the stack will be resumed and they will be connected automatically and securely.
 They will not need a username, password, or host prompts to their personal lab environment.
 This happens transparently in the browser.
 
 The student can work at their own pace in their environment.
-However, when a student closes the browser where the `hastexo` unit is displayed, or if they put their computer to sleep, a countdown is started.
+However, when a student closes the browser where the `stackamole` unit is displayed, or if they put their computer to sleep, a countdown is started.
 If the student does not reopen the environment within two minutes their stack will be suspended.
 When a student comes back to the lab environment to finish the exercise, their stack is resumed automatically.
 They are connected to the same training environment they were working with before, in the *same state* they left it in.
@@ -580,10 +582,10 @@ To copy from their terminal into their local clipboard, the learner must:
 
 ## Django admin page
 
-To facilitate management of stack states without direct access to the database, a Django admin page is provided as a frontend for the `hastexo_stack` table.
+To facilitate management of stack states without direct access to the database, a Django admin page is provided as a frontend for the `stackamole_stack` table.
 To access it, go to the following as a superuser:
 
-https://lms.example.com/admin/hastexo/stack
+https://lms.example.com/admin/stackamole/stack
 
 The following features are currently implemented:
 
@@ -611,7 +613,7 @@ Furthermore, the following are not currently possible:
 
 * Adding a stack record
 
-Note that making changes to the `hastexo_stack` table does not affect the stacks themselves.
+Note that making changes to the `stackamole_stack` table does not affect the stacks themselves.
 In other words, deleting an existing stack here will merely delete its database record: not only will the stack itself continue to exist, but the XBlock will cease to handle it automatically (such as suspending or deleting it) until such time as the learner relaunches it.
 The admin page is only offered as a convenient way to manually synchronize the database with actual stack states in case of failure.
 It should not be necessary to do so in day-to-day usage of the XBlock.

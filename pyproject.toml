@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "setuptools-scm[toml]>=7"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hastexo-xblock"
+name = "stackamole-xblock"
 dynamic = ["version"]
 dependencies = [
     "apscheduler<4",
@@ -26,7 +26,7 @@ dependencies = [
     "XBlock>=5.2,<6"
 ]
 requires-python = ">=3.11"
-description = "hastexo XBlock: Makes arbitrarily complex lab environments available on an Open edX LMS"
+description = "Stackamole XBlock: Makes arbitrarily complex lab environments available on an Open edX LMS"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "AGPL-3.0-only"
 license-files = ["LICENSE"]
@@ -41,10 +41,12 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/cleura/hastexo-xblock"
+Repository = "https://github.com/cleura/stackamole-xblock"
 
 [project.entry-points."xblock.v1"]
-hastexo = "hastexo.hastexo:HastexoXBlock"
+stackamole = "stackamole.stackamole:StackamoleXBlock"
+# keep a 'hastexo' entrypoint for backwards compatiblity with existing course modules.
+hastexo = "stackamole.stackamole:StackamoleXBlock"
 
 [tool.setuptools_scm]
 
@@ -52,7 +54,7 @@ hastexo = "hastexo.hastexo:HastexoXBlock"
 packages = { find = {} }
 
 [tool.setuptools.package-data]
-hastexo_xblock = [
+stackamole_xblock = [
   "static/**",
   "public/**",
   "translations/**",

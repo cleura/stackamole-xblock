@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Run tests for the hastexo XBlock.
+Run tests for the Stackamole XBlock.
 
 This script is required because the workbench SDK's settings file is not in any
 python module.
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     from django.conf import settings
     settings.DEBUG = True
-    settings.INSTALLED_APPS += ("hastexo", "common.djangoapps.student", )
+    settings.INSTALLED_APPS += ("stackamole", "common.djangoapps.student", )
 
     from django.core.management import execute_from_command_line
     args = sys.argv[1:]
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         paths = ["tests/"]
     options = [arg for arg in args if arg not in paths]
 
-    c = coverage(source=['hastexo'],
+    c = coverage(source=['stackamole'],
                  omit=['*tests*', '*heat-templates*',
                        '*src*', '*requirements'],
                  auto_data=True)

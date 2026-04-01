@@ -3,10 +3,10 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
 
-from hastexo.jobs import SuspenderJob, ReaperJob
-from hastexo.models import Stack, StackLog
-from hastexo.provider import ProviderException
-from hastexo.common import (
+from stackamole.jobs import SuspenderJob, ReaperJob
+from stackamole.models import Stack, StackLog
+from stackamole.provider import ProviderException
+from stackamole.common import (
     CREATE_COMPLETE,
     SUSPEND_PENDING,
     DELETE_PENDING,
@@ -15,7 +15,7 @@ from hastexo.common import (
 )
 
 
-class TestHastexoJobs(TestCase):
+class TestStackamoleJobs(TestCase):
     def setUp(self):
         self.stack_states = {
             'CREATE_IN_PROGRESS',
@@ -58,9 +58,9 @@ class TestHastexoJobs(TestCase):
 
         # Patchers
         patchers = {
-            "Provider": patch("hastexo.jobs.Provider"),
-            "DeleteStackTask": patch("hastexo.jobs.DeleteStackTask"),
-            "SuspendStackTask": patch("hastexo.jobs.SuspendStackTask"),
+            "Provider": patch("stackamole.jobs.Provider"),
+            "DeleteStackTask": patch("stackamole.jobs.DeleteStackTask"),
+            "SuspendStackTask": patch("stackamole.jobs.SuspendStackTask"),
         }
         self.mocks = {}
         for mock_name, patcher in patchers.items():

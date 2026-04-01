@@ -1,0 +1,4 @@
+<stackamole>
+  <!--Fake comment 1-->
+  <hook_events resume="True" suspend="true"/>
+</stackamole>

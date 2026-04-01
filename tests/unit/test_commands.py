@@ -9,7 +9,7 @@ except ImportError:
 
 class SuspenderTestCase(TestCase):
 
-    @patch('hastexo.jobs.SuspenderJob')
+    @patch('stackamole.jobs.SuspenderJob')
     def test_start_suspender(self, mock_suspender):
         # We need to mock the scheduler here, because we obviously
         # don't want to add an actual recurring job during testing
@@ -22,7 +22,7 @@ class SuspenderTestCase(TestCase):
 
 class ReaperTestCase(TestCase):
 
-    @patch('hastexo.jobs.ReaperJob')
+    @patch('stackamole.jobs.ReaperJob')
     def test_start_reaper(self, mock_reaper):
         with patch('apscheduler.schedulers.blocking.BlockingScheduler'):
             call_command('reaper')
