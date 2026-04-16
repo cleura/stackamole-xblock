@@ -6,3 +6,4 @@ var/
 dist/
 .coverage
 .tox/
+.ai/
