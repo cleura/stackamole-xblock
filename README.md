@@ -49,20 +49,20 @@ It is only limited by the feature set of the cloud's deployment features.
 Running this XBlock with Tutor (for Open edX Maple and later) requires two steps:
 
 1. Install the XBlock to your Tutor environment by adding it to the `OPENEDX_EXTRA_PIP_REQUIREMENTS` list in `config.yml`:
-   ```
+   ```yaml
    OPENEDX_EXTRA_PIP_REQUIREMENTS:
      - "hastexo-xblock==8.7.0"
    ```
    For additional information, please refer to the [official documentation](https://docs.tutor.overhang.io/configuration.html#installing-extra-xblocks-and-requirements).
 
 2. Install and enable the `tutor-contrib-hastexo` plugin:
-   ```
+   ```shell
    pip install git+https://github.com/cleura/tutor-contrib-hastexo
    tutor plugins enable hastexo
    ```
    Add the necessary configurations to your Tutor `config.yml`.
    Unless you want to change the default configurations, you'll only need to add the settings for the XBlock via `HASTEXO_XBLOCK_SETTINGS`, for example:
-   ```
+   ```yaml
    HASTEXO_XBLOCK_SETTINGS:
      check_timeout: 120
      delete_age: 0
@@ -121,13 +121,13 @@ Running this XBlock with Tutor (for Open edX Maple and later) requires two steps
    For more details about each setting, please refer to [the *XBlock settings* section](#xblock-settings) below.
 
 3. Before deploying services with Tutor, build the Docker image for the `hastexo` service, and also build a custom `openedx` image:
-   ```
+   ```shell
    tutor images build openedx hastexo
    ```
    For more information about the plugin configuration, please refer to [the plugin README](https://github.com/cleura/tutor-contrib-hastexo).
 
 4. After you have deployed Open edX with Tutor, your platform is operational, and you have created a course in Open edX Studio, go to *Settings* → *Advanced Settings* and add the `hastexo` module to *Advanced Module List,* like so:
-   ```
+   ```json
    [
     "annotatable",
     "openassessment",
@@ -307,7 +307,7 @@ A sample Heat template is provided under `samples/hot/sample-template.yaml`.
 
 Accepting the run parameter:
 
-```
+```yaml
 run:
   type: string
   description: Stack run
@@ -315,7 +315,7 @@ run:
 
 Generating an SSH key pair:
 
-```
+```yaml
 training_key:
   type: OS::Nova::KeyPair
   properties:
@@ -325,7 +325,7 @@ training_key:
 
 Generating a random password and setting it:
 
-```
+```yaml
 stack_password:
   type: OS::Heat::RandomString
   properties:
@@ -345,7 +345,7 @@ cloud_config:
 
 Defining the outputs:
 
-```
+```yaml
 outputs:
   public_ip:
     description: Floating IP address of deploy in public network
@@ -442,7 +442,7 @@ You can also use the following nested XML options:
 
 For example, in XML:
 
-```
+```xml
 <vertical url_name="lab_introduction">
   <hastexo xmlns:option="http://code.edx.org/xblock/option"
     url_name="lab_introduction"
@@ -517,7 +517,7 @@ The following child block types are currently supported:
 
 If using OLX, html blocks can be defined separately in the `html` subdirectory as usual, with the child element referring to it by URL name:
 
-```
+```xml
 <vertical url_name="lab_introduction">
   <hastexo ...>
     <html url_name="lab_instructions">
