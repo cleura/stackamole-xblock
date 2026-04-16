@@ -1,7 +1,7 @@
 Unreleased
 -------------------------
 
-* Drop support for GCloud Provier.
+* Drop support for GCloud Provider.
   The Cloud Deployment Manager, which the current implementation is based on, will reach end of support on March 31, 2026.
   (https://docs.cloud.google.com/deployment-manager/docs)
 
@@ -30,7 +30,7 @@ Version 8.5.2 (2025-11-07)
 Version 8.5.1 (2025-09-19)
 -------------------------
 
-* [Bug fix] Add upper contraint to `oslo.i18n` dependency to avoid pulling in a newer, incompatible version.
+* [Bug fix] Add upper constraint to `oslo.i18n` dependency to avoid pulling in a newer, incompatible version.
 
 Version 8.5.0 (2025-07-30)
 -------------------------
@@ -66,7 +66,7 @@ Version 8.1.0 (2024-11-20)
 Version 8.0.1 (2024-11-13)
 -------------------------
 
-* [Bug fix] Add more authentication checks when accessing a fullscreen lab directly from an URL.
+* [Bug fix] Add more authentication checks when accessing a fullscreen lab directly from a URL.
   Return a 401 when user is not authenticated on the platform.
 
 Version 8.0.0 (2024-10-16)
