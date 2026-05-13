@@ -3,10 +3,12 @@
 
 # Stackamole XBlock
 
-The stackamole [XBlock](https://xblock.readthedocs.org/en/latest/) is an [Open edX](https://open.edx.org/) API that integrates realistic lab environments into distributed computing courses.
-The stackamole XBlock allows students to access an OpenStack environment within an edX course.
+The Stackamole[^name] [XBlock](https://xblock.readthedocs.org/en/latest/) is an [Open edX](https://open.edx.org/) API that integrates realistic lab environments into distributed computing courses.
+The Stackamole XBlock allows students to access an OpenStack environment within an edX course.
 
-It leverages [Apache Guacamole](https://guacamole.incubator.apache.org/) as a browser-based connection mechanism, which includes the ability to connect to graphical user environments (via VNC and RDP), in addition to terminals (via SSH).
+[^name]: The name is a [portmanteau](https://en.wikipedia.org/wiki/Portmanteau) of "stack" and "guacamole".
+
+It leverages [Apache Guacamole](https://guacamole.apache.org/) as a browser-based connection mechanism, which includes the ability to connect to graphical user environments (via VNC and RDP), in addition to terminals (via SSH).
 
 This repository was previously named the `hastexo-xblock`, and renamed to `stackamole-xblock` in May 2026.
 See [`MIGRATION.md`](MIGRATION.md) for migration notes.
@@ -33,14 +35,14 @@ Instructions for deploying this XBlock with Tutor can be found below, in the [De
 
 ## Purpose
 
-The stackamole XBlock orchestrates a virtual environment (a "stack") that runs on a private or public cloud (currently [OpenStack](https://www.openstack.org)) using its orchestration engine.
+The Stackamole XBlock orchestrates a virtual environment (a "stack") that runs on a private or public cloud (currently [OpenStack](https://www.openstack.org)) using its orchestration engine.
 It provides a Secure Shell session directly within the courseware.
 
 Stack creation is idempotent, so a fresh stack will be spun up only if it does not already exist.
 An idle stack will auto-suspend after a configurable time period, which is two minutes by default.
 The stack will resume automatically when the student returns to the lab environment.
 
-Since public cloud environments typically charge by the minute to *run* virtual machines, the stackamole XBlock makes lab environments cost effective to deploy.
+Since public cloud environments typically charge by the minute to *run* virtual machines, the Stackamole XBlock makes lab environments cost effective to deploy.
 The Stackamole XBlock can run a fully distributed virtual lab environment for a course in [Ceph](http://ceph.com), OpenStack, or [Open vSwitch](http://openvswitch.org/) for approximately $25 per month on a public cloud (assuming students use the environment for 1 hour per day).
 
 Course authors can fully define and customize the lab environment.
@@ -139,7 +141,7 @@ Running this XBlock with Tutor (for Open edX Maple and later) requires two steps
 
 ## XBlock settings
 
-The stackamole XBlock must be configured via `XBLOCK_SETTINGS` in `lms.env.json` (or `lms.yml`), under the `stackamole` key.
+The Stackamole XBlock must be configured via `XBLOCK_SETTINGS` in `lms.env.json` (or `lms.yml`), under the `stackamole` key.
 At the very minimum, you must configure a single "default" provider with the credentials specific to the cloud you will be using.
 All other variables can be left at their defaults.
 
@@ -274,7 +276,7 @@ This is a brief explanation of each:
 
 ## Creating an orchestration template for your course
 
-To use the stackamole XBlock, start by creating an orchestration template and uploading it to the content store.
+To use the Stackamole XBlock, start by creating an orchestration template and uploading it to the content store.
 The XBlock imposes some constraints on the template (detailed below), but you are otherwise free to customize your training environment as needed.
 
 To ensure your template has the required configuration:
@@ -531,7 +533,7 @@ Child blocks will always be rendered _above_ the terminal.
 
 ### Using the Stackamole XBlock while masquerading as a specific learner
 
-Instructors can use the stackamole XBlock lab environments when masquerading as a specific learner by using the "View this course as:" option in the LMS staff header.
+Instructors can use the Stackamole XBlock lab environments when masquerading as a specific learner by using the "View this course as:" option in the LMS staff header.
 
 The learner will not know when an instructor is using their lab, so we advise to be mindful of the changes you make while the learner is active at the same lab.
 
@@ -539,7 +541,7 @@ This feature should be considered experimental, and is subject to future change 
 
 ## Student experience
 
-When students navigate to a unit with a stackamole XBlock in it, a new Heat stack will be created (or resumed) for them.
+When students navigate to a unit with a Stackamole XBlock in it, a new Heat stack will be created (or resumed) for them.
 The Heat stack will be as defined in the uploaded Heat template.
 It is unique per student and per course run.
 If the same tag appears on a different course, or different run of the same course, the student will get a different stack.
