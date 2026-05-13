@@ -41,7 +41,7 @@ function StackamoleGuacamoleClient(configuration) {
 
     /* Keyboard handling.  */
     var keyboard = new Guacamole.Keyboard(terminal_element);
-    var ctrl, shift = false;
+    var ctrl, shift, cmd = false;
 
     keyboard.onkeydown = function (keysym) {
         var cancel_event = true;
@@ -49,6 +49,8 @@ function StackamoleGuacamoleClient(configuration) {
         /* Don't cancel event on paste shortcuts. */
         if (keysym == 0xFFE1 /* shift */
             || keysym == 0xFFE3 /* ctrl */
+            || keysym == 0xFFE7 /* cmd (left) */
+            || keysym == 0xFFE8 /* cmd (right) */
             || keysym == 0xFF63 /* insert */
             || keysym == 0x0056 /* V */
             || keysym == 0x0076 /* v */
@@ -56,11 +58,20 @@ function StackamoleGuacamoleClient(configuration) {
             cancel_event = false;
         }
 
-        /* Remember when ctrl or shift are down. */
+        /* Remember when ctrl, shift or cmd are down. */
         if (keysym == 0xFFE1) {
             shift = true;
         } else if (keysym == 0xFFE3) {
             ctrl = true;
+        } else if (keysym == 0xFFE7 || keysym == 0xFFE8) {
+            cmd = true;
+        }
+
+        // Don't send any key event when running cmd-v on a Mac, to avoid
+        // typing a 'v' in the terminal.
+        // just return, to register the paste event
+        if (cmd && keysym == 0x0076) { /* cmd-v */
+            return !cancel_event;
         }
 
         /* Delay sending final stroke until clipboard is updated. */
