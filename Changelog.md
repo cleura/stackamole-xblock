@@ -1,4 +1,4 @@
-Unreleased
+Version 9.0.0 (2026-05-13)
 -------------------------
 
 * [BREAKING CHANGE] Rename the XBlock from `hastexo` to `stackamole`.
