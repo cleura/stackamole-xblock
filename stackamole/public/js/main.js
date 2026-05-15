@@ -33,7 +33,7 @@ function StackamoleXBlock(runtime, element, configuration) {
         }
 
         /* Set dialog container. */
-        dialog_container = $(element).find('.hastexblock')[0];
+        dialog_container = $(element).find('.stackamolexblock')[0];
 
         /* Bind reset button action. */
         $(element).find('.buttons.bar > .reset').on('click', reset_dialog);
@@ -206,7 +206,7 @@ function StackamoleXBlock(runtime, element, configuration) {
                     /* Consider the terminal parent as the parent of our layout objects */
                     layout_parent = terminal_parent
                     lab_instructions = $('.lab_instructions')
-                    terminal = $('.hastexblock')
+                    terminal = $('.stackamolexblock')
                 }
                 else {
                     /* find the vertical element that contains the lab instructions */
@@ -218,7 +218,7 @@ function StackamoleXBlock(runtime, element, configuration) {
                     $('#container').addClass('terminal-side-view');
                     $(layout_parent).addClass('content-side-by-side');
                     /* Make sure the xblock fits to content area */
-                    $(layout_parent).height($('.hastexblock').height() + 20);
+                    $(layout_parent).height($('.stackamolexblock').height() + 20);
 
                     $(lab_instructions).css({
                         'float': [instructions_layout],

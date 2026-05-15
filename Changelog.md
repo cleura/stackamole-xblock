@@ -1,3 +1,8 @@
+Unreleased
+-------------------------
+
+* [Bug fix] Rename the CSS class for labs from `hastexblock` to `stackamolexblock`, post the XBlock rename.
+
 Version 9.0.0 (2026-05-13)
 -------------------------
 
