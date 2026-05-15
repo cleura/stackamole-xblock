@@ -1,4 +1,4 @@
-Unreleased
+Version 9.1.0 (2026-05-15)
 -------------------------
 
 * [Enhancement] Add Mac Cmd+V paste support for the lab terminal.
