@@ -1,3 +1,8 @@
+Unreleased
+-------------------------
+
+* [Bug fix] Fix stuck modifier key state after using Cmd+V paste on Mac.
+
 Version 9.1.0 (2026-05-15)
 -------------------------
 

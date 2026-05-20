@@ -95,6 +95,13 @@ function StackamoleGuacamoleClient(configuration) {
             shift = false;
         } else if (keysym == 0xFFE3) {
             ctrl = false;
+        } else if (keysym == 0xFFE7 || keysym == 0xFFE8) {
+            cmd = false;
+        }
+
+        // Just return, to release the cmd key, after running a cmd-v on a Mac
+        if (cmd && keysym == 0x0076) { /* cmd-v */
+            return;
         }
 
         /* Delay sending final stroke until clipboard is updated. */
