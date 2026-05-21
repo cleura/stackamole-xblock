@@ -55,7 +55,7 @@ Running this XBlock with Tutor (for Open edX Maple and later) requires two steps
 1. Install the XBlock to your Tutor environment by adding it to the `OPENEDX_EXTRA_PIP_REQUIREMENTS` list in `config.yml`:
    ```yaml
    OPENEDX_EXTRA_PIP_REQUIREMENTS:
-     - "stackamole-xblock==9.1.0"
+     - "stackamole-xblock==9.1.1"
    ```
    For additional information, please refer to the [official documentation](https://docs.tutor.overhang.io/configuration.html#installing-extra-xblocks-and-requirements).
 
