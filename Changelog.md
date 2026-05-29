@@ -1,3 +1,8 @@
+Unreleased
+-------------------------
+
+* [Documentation] Note in README that this XBlock is not supported in Libraries V2 (Ulmo) due to child block limitations.
+
 Version 9.1.1 (2026-05-21)
 -------------------------
 
