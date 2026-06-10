@@ -15,18 +15,16 @@ from stackamole.common import (
 from common.djangoapps.student.models import AnonymousUserId
 from fs.osfs import OSFS
 from lxml import etree
-from markdown_xblock import MarkdownXBlock
 from unittest.mock import Mock, patch, DEFAULT
 from webob import Request
 from django.contrib.auth.models import User
 from django.test import TestCase
 from workbench.runtime import WorkbenchRuntime
-from xblock.core import XBlock
 from xblock.fields import ScopeIds
 from xblock.runtime import KvsFieldData, DictKeyValueStore
 from xblock.scorable import Score
 from xblock.test.test_parsing import XmlTest
-from sample_xblocks.basic.content import HtmlBlock
+from opaque_keys.edx.locator import LibraryUsageLocatorV2
 
 
 def make_request(data, method='POST'):
@@ -197,21 +195,14 @@ class TestStackamoleXBlockParsing(XmlTest, TestCase):
         self.assertEqual(block.tests[0], "Multi-line\ntest 1\n")
         self.assertEqual(block.tests[1], "Multi-line\ntest 2\n")
 
-    @XBlock.register_temp_plugin(HtmlBlock, "html")
     def test_student_view(self):
         block = self.parse_xml_to_block(textwrap.dedent("""\
     <?xml version='1.0' encoding='utf-8'?>
     <stackamole xmlns:option="http://code.edx.org/xblock/option"
-      stack_template_path='hot_lab.yaml'
-      stack_user_name='training'
-      stack_protocol='rdp'
-      launch_timeout='900'>
-      <html>
-        This is a child.
-      </html>
-      <html>
-        This is another child.
-      </html>
+    stack_template_path='hot_lab.yaml'
+    stack_user_name='training'
+    stack_protocol='rdp'
+    launch_timeout='900'>
     </stackamole>
             """).encode('utf-8'))
 
@@ -227,53 +218,28 @@ class TestStackamoleXBlockParsing(XmlTest, TestCase):
                 create_stack=mock_create_stack):
 
             frag = block.student_view({})
-            html = frag.body_html()
+            self.assertNotEqual(frag.content, "")
 
-        self.assertIn("This is a child.", html)
-        self.assertIn("This is another child.", html)
-
-    @XBlock.register_temp_plugin(HtmlBlock, "html")
-    def test_nested_blocks_spec(self):
-        """A nested html element should be supported."""
+    def test_author_view(self):
         block = self.parse_xml_to_block(textwrap.dedent("""\
     <?xml version='1.0' encoding='utf-8'?>
     <stackamole xmlns:option="http://code.edx.org/xblock/option"
-      stack_template_path='hot_lab.yaml'
-      stack_user_name='training'
-      stack_protocol='rdp'
-      launch_timeout='900'>
-      <html>
-        This is a child.
-      </html>
+    stack_template_path='hot_lab.yaml'
+    stack_user_name='training'
+    stack_protocol='rdp'
+    launch_timeout='900'>
     </stackamole>
             """).encode('utf-8'))
+        block.scope_ids = block.scope_ids._replace(
+            usage_id=LibraryUsageLocatorV2.from_string(
+                "lb:org:lib:stackamole:test"))
 
-        specs = block.get_nested_blocks_spec()
-        self.assertEqual(len(specs), 2)
-
-    def test_parsing_nested_markdown_xblock(self):
-        """A nested markdown element should be supported."""
-
-        with patch('markdown_xblock.html.MarkdownXBlock.parse_xml') as p:
-            p.return_value = Mock()
-
-            block = self.parse_xml_to_block(textwrap.dedent("""\
-        <?xml version='1.0' encoding='utf-8'?>
-        <stackamole xmlns:option="http://code.edx.org/xblock/option"
-            stack_template_path='hot_lab.yaml'
-            stack_user_name='training'
-            stack_protocol='rdp'
-            launch_timeout='900'>
-            <markdown/>
-        </stackamole>
-                """).encode('utf-8'))
-
-            self.assertTrue(p.called)
-            self.assertTrue(block.has_children)
-            nested_blocks = block.get_children()
-
-            self.assertEqual(len(nested_blocks), 1)
-            self.assertEqual(nested_blocks[0].display_name, 'Markdown')
+        frag1 = block.student_view({})
+        frag2 = block.author_view({})
+        # in a library context, student view will return the author view
+        self.assertEqual(frag1.content, frag2.content)
+        # author view returns an empty fragment
+        self.assertEqual(frag2.content, "")
 
 
 class TestStackamoleXBlock(TestCase):
@@ -1157,43 +1123,28 @@ class TestStackamoleXBlock(TestCase):
         export_fs.remove('stackamole/fake_lab.xml')
         export_fs.removedir('stackamole')
 
-    def test_export_nested_xblock(self):
-        # set up a markdown xblock
-        markdown_xblock = MarkdownXBlock(
-            self.block.runtime,
-            scope_ids=(ScopeIds('user', 'markdown', '.markdown.d0',
-                                '.markdown.d0.u0')))
-        markdown_xblock.url_name = 'fake_lab_instructions'
-        markdown_xblock.category = 'markdown'
-
+    def test_libary_save(self):
         # setup
         self.init_block()
-        self.block.children.append(markdown_xblock)
         self.block.url_name = 'fake_lab'
         self.block.category = 'stackamole'
-        export_fs = OSFS('fake/course')
-        self.block.runtime.export_fs = export_fs
-        self.block.runtime.get_block = Mock()
-        self.block.runtime.get_block.return_value = markdown_xblock
-        self.block.runtime.add_block_as_child_node = Mock()
+        self.block.scope_ids = self.block.scope_ids._replace(
+            usage_id=LibraryUsageLocatorV2.from_string(
+                "lb:org:lib:stackamole:test"))
 
         # create an empty node
         node = etree.Element('unknown')
 
+        # assert that the node is empty, with a tag 'unknown'
+        self.assertEqual(node.items(), [])
+        self.assertEqual(node.tag, 'unknown')
+
         # run the export
         self.block.add_xml_to_node(node)
 
-        # assert get_block and add_block_as_child_node were called
-        self.block.runtime.get_block.assert_called_once_with(markdown_xblock)
-        self.block.runtime.add_block_as_child_node.assert_called_once_with(
-            markdown_xblock, node)
-
-        # assert that the exported file exists
-        self.assertTrue(export_fs.exists('stackamole/fake_lab.xml'))
-
-        # clean up
-        export_fs.remove('stackamole/fake_lab.xml')
-        export_fs.removedir('stackamole')
+        # assert that the node now contains the xblock information
+        self.assertNotEqual(node.items(), [])
+        self.assertEqual(node.tag, 'stackamole')
 
     def test_parse_xblock_from_separate_file(self):
         block_type = 'stackamole'
