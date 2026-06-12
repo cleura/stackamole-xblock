@@ -8,9 +8,7 @@ lazy<=1.5
 openedx-django-pyfs>=3.8.0
 sqlparse>=0.4.1,<0.5
 web-fragments<=2.0.0
-
-# Other XBlocks that are supported as nested elements
-markdown-xblock
+edx-opaque-keys<=3.0.0
 
 # dependencies of supported nested XBlocks
 path.py>=12.4

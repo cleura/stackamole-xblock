@@ -1,7 +1,8 @@
 Unreleased
 -------------------------
 
-* [Documentation] Note in README that this XBlock is not supported in Libraries V2 (Ulmo) due to child block limitations.
+* [Enhancement] Remove child block support to enable compatibility with Content Libraries V2.
+  Library Units now provide a way to combine a Stackamole Lab with other blocks (in a library Unit), making child blocks unnecessary for this purpose.
 
 Version 9.1.1 (2026-05-21)
 -------------------------

@@ -12,8 +12,6 @@ from web_fragments.fragment import Fragment
 from xblock.utils.resources import ResourceLoader
 from xblock.utils.settings import XBlockWithSettingsMixin
 from xblock.utils.studio_editable import (
-    NestedXBlockSpec,
-    StudioContainerWithNestedXBlocksMixin,
     StudioEditableXBlockMixin
 )
 
@@ -26,6 +24,7 @@ from django.utils import timezone, translation
 from lxml import etree
 
 from common.djangoapps.student.models import AnonymousUserId
+from opaque_keys.edx.locator import LibraryUsageLocatorV2
 
 from .models import Stack
 from .common import (
@@ -61,8 +60,7 @@ class LaunchError(Exception):
 class StackamoleXBlock(XBlock,
                        XBlockWithSettingsMixin,
                        ScorableXBlockMixin,
-                       StudioEditableXBlockMixin,
-                       StudioContainerWithNestedXBlocksMixin):
+                       StudioEditableXBlockMixin):
     """
     Provides lab environments and an SSH connection to them.
 
@@ -82,6 +80,7 @@ class StackamoleXBlock(XBlock,
 
     # Mandatory: must be set per instance.
     stack_user_name = String(
+        default="",
         scope=Scope.settings,
         help="The name of the training user in the stack.")
     stack_protocol = String(
@@ -255,7 +254,6 @@ class StackamoleXBlock(XBlock,
 
     has_author_view = True
     has_score = True
-    has_children = True
     icon_class = 'problem'
     block_settings_key = SETTINGS_KEY
     show_in_read_only_mode = True
@@ -373,9 +371,6 @@ class StackamoleXBlock(XBlock,
 
                     else:
                         logger.warning(f"Unknown attribute: {child.tag}")
-            # Import nested blocks
-            for child in node:
-                block.runtime.add_node_as_child(block, child)
 
         else:
             for child in node:
@@ -391,9 +386,6 @@ class StackamoleXBlock(XBlock,
                         block, tag, child.text, child.attrib)
                 elif tag in ['test', 'port', 'provider']:
                     cls.parse_attributes(child.tag, child, block)
-                else:
-                    # Import nested blocks
-                    block.runtime.add_node_as_child(block, child)
 
         # Attributes become fields.
         for name, value in list(node.items()):  # lxml has no iteritems
@@ -430,72 +422,80 @@ class StackamoleXBlock(XBlock,
         For exporting, set data on etree.Element `node`.
         """
 
-        # Write xml data to file
-        pathname = self.url_name.replace(':', '/')
-        filepath = u'{category}/{pathname}.xml'.format(
-            category=self.CATEGORY,
-            pathname=pathname
-        )
+        if self.in_library:
+            root = node
+            root.tag = self.CATEGORY
+        else:
+            # Write xml data to file
+            pathname = self.url_name.replace(':', '/')
+            filepath = u'{category}/{pathname}.xml'.format(
+                category=self.CATEGORY,
+                pathname=pathname
+            )
 
-        self.runtime.export_fs.makedirs(
-            os.path.dirname(filepath),
-            recreate=True)
+            self.runtime.export_fs.makedirs(
+                os.path.dirname(filepath),
+                recreate=True)
 
-        with self.runtime.export_fs.open(filepath, 'wb') as filestream:
+            filestream = self.runtime.export_fs.open(filepath, 'wb')
             root = etree.Element('stackamole')
 
-            if self.hook_events:
-                hook_events_node = etree.SubElement(root, 'hook_events')
-                hook_events_node.set(
-                    'suspend', str(self.hook_events.get("suspend", True)))
-                hook_events_node.set(
-                    'resume', str(self.hook_events.get("resume", True)))
-                hook_events_node.set(
-                    'delete', str(self.hook_events.get("delete", True)))
+        if self.hook_events:
+            hook_events_node = etree.SubElement(root, 'hook_events')
+            hook_events_node.set(
+                'suspend', str(self.hook_events.get("suspend", True)))
+            hook_events_node.set(
+                'resume', str(self.hook_events.get("resume", True)))
+            hook_events_node.set(
+                'delete', str(self.hook_events.get("delete", True)))
 
-            if self.ports:
-                for port in self.ports:
-                    # port must have values for 'name' and 'number',
-                    # raises KeyError if not defined.
-                    port_node = etree.SubElement(root, 'port')
-                    port_node.set('name', port['name'])
-                    port_node.set('number', str(port['number']))
+        if self.ports:
+            for port in self.ports:
+                # port must have values for 'name' and 'number',
+                # raises KeyError if not defined.
+                port_node = etree.SubElement(root, 'port')
+                port_node.set('name', port['name'])
+                port_node.set('number', str(port['number']))
 
-            if self.providers:
-                for provider in self.providers:
-                    provider_node = etree.SubElement(root, 'provider')
-                    # raises KeyError if 'name' is not defined
-                    # one must not add a provider without a name
-                    provider_node.set('name', provider['name'])
-                    capacity = provider.get("capacity", None)
-                    if capacity in (None, "None", ""):
-                        # capacity should not be undefined
-                        # set to -1 (unlimited) in case it is
-                        capacity = -1
-                    provider_node.set('capacity', str(capacity))
-                    # Not having a 'template' or an 'environment' defined for
-                    # a provider is a valid option.
-                    # Only add to node when defined a non-empty value.
-                    template = provider.get("template", None)
-                    if template not in (None, "None"):
-                        provider_node.set('template', template)
-                    environment = provider.get("environment", None)
-                    if environment not in (None, "None"):
-                        provider_node.set('environment', environment)
+        if self.providers:
+            for provider in self.providers:
+                provider_node = etree.SubElement(root, 'provider')
+                # raises KeyError if 'name' is not defined
+                # one must not add a provider without a name
+                provider_node.set('name', provider['name'])
+                capacity = provider.get("capacity", None)
+                if capacity in (None, "None", ""):
+                    # capacity should not be undefined
+                    # set to -1 (unlimited) in case it is
+                    capacity = -1
+                provider_node.set('capacity', str(capacity))
+                # Not having a 'template' or an 'environment' defined for
+                # a provider is a valid option.
+                # Only add to node when defined a non-empty value.
+                template = provider.get("template", None)
+                if template not in (None, "None"):
+                    provider_node.set('template', template)
+                environment = provider.get("environment", None)
+                if environment not in (None, "None"):
+                    provider_node.set('environment', environment)
 
-            if self.tests:
-                for test in self.tests:
-                    etree.SubElement(
-                        root, 'test').text = etree.CDATA(test)
+        if self.tests:
+            for test in self.tests:
+                etree.SubElement(
+                    root, 'test').text = etree.CDATA(test)
+
+        if not self.in_library:
             etree.ElementTree(
                 root).write(filestream, pretty_print=True, encoding='utf-8')
+            filestream.close()
+            # Write out the xml file name
+            filename = os.path.basename(pathname)
+            node.tag = self.CATEGORY
+            node.set('filename', filename)
 
-        # Write out the xml file name
-        filename = os.path.basename(pathname)
+            self._set_module_name()
 
         # Add all editable fields as node attributes
-        node.tag = self.CATEGORY
-        node.set("filename", filename)
         node.set('xblock-family', self.entry_point)
         node.set('display_name', self.display_name)
         node.set('progress_check_label', self.progress_check_label)
@@ -516,49 +516,10 @@ class StackamoleXBlock(XBlock,
         node.set('hidden', str(self.hidden))
         node.set('enable_fullscreen', self.enable_fullscreen)
 
-        # Include nested blocks in course export
-        if self.has_children:
-            for child_id in self.children:
-                child = self.runtime.get_block(child_id)
-                self.runtime.add_block_as_child_node(child, node)
-
-        self._set_module_name()
-
     @property
-    def allowed_nested_blocks(self):
-        """
-        Returns a list of allowed nested blocks.
-
-        """
-        additional_blocks = []
-        try:
-            from xmodule.video_module.video_module import VideoBlock
-            _spec = NestedXBlockSpec(
-                VideoBlock, category="video", label=u"Video"
-            )
-            additional_blocks.append(_spec)
-        except ImportError:
-            logger.warning("Unable to import VideoBlock", exc_info=True)
-
-        try:
-            from pdf import pdfXBlock
-            _spec = NestedXBlockSpec(pdfXBlock, category="pdf", label=u"PDF")
-            additional_blocks.append(_spec)
-        except ImportError:
-            logger.info("Unable to import pdfXblock", exc_info=True)
-
-        try:
-            from markdown_xblock import MarkdownXBlock
-            _spec = NestedXBlockSpec(MarkdownXBlock,
-                                     category="markdown",
-                                     label=u"Markdown")
-            additional_blocks.append(_spec)
-        except ImportError:
-            logger.info("Unable to import MarkdownXBlock", exc_info=True)
-
-        return [
-            NestedXBlockSpec(None, category="html", label=u"HTML")
-        ] + additional_blocks
+    def in_library(self):
+        # Check if we are in the library context
+        return isinstance(self.scope_ids.usage_id, LibraryUsageLocatorV2)
 
     def is_correct(self):
         if self.score:
@@ -732,6 +693,11 @@ class StackamoleXBlock(XBlock,
         The primary view of the StackamoleXBlock, shown to students when
         viewing courses.
         """
+        # Library will call the student view, don't try to launch a lab,
+        # return the author view instead.
+        if self.in_library:
+            return self.author_view()
+
         # Load configuration
         settings = get_xblock_settings()
 
@@ -745,21 +711,12 @@ class StackamoleXBlock(XBlock,
 
         frag = Fragment()
 
-        # Render children
-        child_content = ""
-        for child_id in self.children:
-            child = self.runtime.get_block(child_id)
-            child_fragment = child.render("student_view", context)
-            frag.add_fragment_resources(child_fragment)
-            child_content += child_fragment.content
-
         # Render the main template
         i18n_service = self.runtime.service(self, "i18n")
 
         frag.add_content(loader.render_django_template(
             "static/html/main.html",
-            {"child_content": child_content,
-             "enable_fullscreen": enable_fullscreen},
+            {"enable_fullscreen": enable_fullscreen},
             i18n_service=i18n_service
         ))
 
@@ -781,6 +738,13 @@ class StackamoleXBlock(XBlock,
         frag.initialize_js('StackamoleXBlock', context)
 
         return frag
+
+    def author_view(self, context=None):
+        """
+        The author view of the StackamoleXBlock, return an empty Fragment
+        when used in Studio and/or in a Library.
+        """
+        return Fragment()
 
     @transaction.atomic
     def create_stack(self, settings, course_id, student_id):

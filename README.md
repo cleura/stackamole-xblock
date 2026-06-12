@@ -507,8 +507,8 @@ Edit the Settings as explained above.
 
 ### Using the Stackamole XBlock in a content library
 
-Using the Stackamole XBlock in a content library is not supported at this time.
-This is due to the [lack of support for child blocks in Libraries V2 (Ulmo)](https://github.com/openedx/openedx-platform/blob/release/ulmo.3/openedx/core/djangoapps/content_libraries/api/blocks.py#L310-L313).
+The Stackamole XBlock supports Content Libraries V2 (Ulmo and later), starting from XBlock version `9.2.0` and Tutor plugin version `3.1.0`.
+Since the Stackamole XBlock no longer supports child blocks, use a separate block (HTML, Markdown) for lab instructions, group it with a Stackamole Lab in a library Unit and add that Unit to your course.
 
 ### Using the Stackamole XBlock while masquerading as a specific learner
 
