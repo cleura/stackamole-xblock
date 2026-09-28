@@ -1009,3 +1009,11 @@ class TestProviderBaseClass(TestCase):
         provider = Provider.init("test_provider")
         provider.set_environment("valid_env_content")
         self.assertEqual(provider.environment, "valid_env_content")
+
+    def test_init_empty_config(self):
+        """
+        Provider.__init__() should raise ProviderException when given an
+        empty config dictionary.
+        """
+        with self.assertRaises(ProviderException):
+            _ = Provider("test_provider", {}, 0)
