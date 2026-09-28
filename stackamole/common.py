@@ -219,14 +219,8 @@ class RemoteExecTimeout(RemoteExecException):
     pass
 
 
-if sys.version_info < (3,):
-    def b(x):
-        return x
-else:
-    import codecs
-
-    def b(x):
-        return codecs.latin_1_encode(x)[0]
+def b(x):
+    return x.encode("latin-1")
 
 
 def get_xblock_settings():
