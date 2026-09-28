@@ -1,2 +1,2 @@
 #!/bin/sh
-exec tox -e py311-flake8,py312-flake8
+exec tox -e py311-flake8,py312-flake8,py313-flake8,py314-flake8

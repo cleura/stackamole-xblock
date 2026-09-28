@@ -22,6 +22,28 @@ py312:
       - .coverage*
     expire_in: 5 minutes
 
+py313:
+  image: python:3.13
+  stage: build
+  script:
+    - pip install tox
+    - tox -e py313-flake8,py312-pipdeptree,py312-pipdeptree-requirements,py312-xblock50-celery5
+  artifacts:
+    paths:
+      - .coverage*
+    expire_in: 5 minutes
+
+py314:
+  image: python:3.14
+  stage: build
+  script:
+    - pip install tox
+    - tox -e py314-flake8,py312-pipdeptree,py312-pipdeptree-requirements,py312-xblock50-celery5
+  artifacts:
+    paths:
+      - .coverage*
+    expire_in: 5 minutes
+
 coverage:
   stage: test
   script:
