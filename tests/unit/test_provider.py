@@ -458,6 +458,30 @@ class TestOpenstackProvider(TestCase):
             provider.create_stack(
                 self.stack_name, self.stack_run, key_type="")
 
+    def test_create_stack_http_500_on_get(self):
+        """
+        create_stack() should raise ProviderException when heat_c.stacks.get()
+        returns an HTTP 500 error during the polling loop.
+        """
+        # Setup
+        heat = self.get_heat_client_mock()
+        heat.stacks.create.side_effect = [
+            {"stack": {"id": self.stack_name}}
+        ]
+        # First get() returns IN_PROGRESS, second get() in polling loop
+        # raises HTTP 500
+        heat.stacks.get.side_effect = [
+            self.stacks["CREATE_IN_PROGRESS"],
+            heat_exc.HTTPInternalServerError
+        ]
+
+        # Run
+        with self.assertRaises(ProviderException):
+            provider = Provider.init(self.provider_name)
+            provider.set_template(self.stack_template)
+            provider.create_stack(
+                self.stack_name, self.stack_run, key_type="")
+
     def test_create_stack_not_found_on_get(self):
         # Setup
         heat = self.get_heat_client_mock()
