@@ -16,7 +16,7 @@ py312:
   stage: build
   script:
     - pip install tox
-    - tox -e py312-flake8,py312-pipdeptree,py312-pipdeptree-requirements,py312-xblock50-celery5
+    - tox -e py312-flake8,py312-pipdeptree,py312-pipdeptree-requirements,py312-xblock50-celery5,py312-xblock60-celery5
   artifacts:
     paths:
       - .coverage*
