@@ -398,7 +398,11 @@ class StackamoleXBlock(XBlock,
         # Temporary step while migrating courses from hastexo to stackamole
         # module. To be removed together with the hastexo entry point.
         block_type = self.scope_ids.block_type
-        if block_type == "hastexo":
+
+        # There is no way to properly test this in unit tests without
+        # access to a real modulestore, hence the "no cover" pragma
+        # for coverage.
+        if block_type == "hastexo":  # pragma: no cover
             from xmodule.modulestore.django import modulestore
             course_key = self.scope_ids.usage_id.course_key
 
