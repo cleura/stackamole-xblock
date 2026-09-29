@@ -805,10 +805,7 @@ class StackamoleXBlock(XBlock,
             if configured_providers.get("default"):
                 provider_name = "default"
             else:
-                try:
-                    provider_name = next(iter(configured_providers))
-                except StopIteration:
-                    pass
+                provider_name = next(iter(configured_providers), None)
 
             if not provider_name:
                 raise Exception("Provider not configured for [%s]." %
