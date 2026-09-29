@@ -4,6 +4,7 @@ import time
 import uuid
 import paramiko
 import logging
+import warnings
 import six
 
 from io import StringIO
@@ -227,8 +228,19 @@ def get_xblock_settings():
     try:
         xblock_settings = django_settings.XBLOCK_SETTINGS
     except AttributeError:
+        warnings.warn(
+            "XBLOCK_SETTINGS not found in Django settings, "
+            "falling back to defaults",
+            RuntimeWarning,
+        )
         settings = DEFAULT_SETTINGS
     else:
+        if SETTINGS_KEY not in xblock_settings:
+            warnings.warn(
+                f'"{SETTINGS_KEY}" not found in XBLOCK_SETTINGS, '
+                "falling back to defaults",
+                RuntimeWarning,
+            )
         settings = xblock_settings.get(
             SETTINGS_KEY, DEFAULT_SETTINGS)
 
