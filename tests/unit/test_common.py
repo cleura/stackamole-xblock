@@ -1,7 +1,9 @@
+import warnings
+
 import ddt
 import errno
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from unittest.mock import Mock, patch
 from pymongo.errors import (
     PyMongoError,
@@ -10,6 +12,8 @@ from pymongo.errors import (
     ServerSelectionTimeoutError,
 )
 from stackamole.common import (
+    DEFAULT_SETTINGS,
+    get_xblock_settings,
     read_from_contentstore,
     ssh_to,
     remote_exec,
@@ -305,3 +309,33 @@ class TestStackamoleCommon(TestCase):
         test_string = 'string to be translated'
         string = _(test_string)
         self.assertEqual(test_string, string)
+
+    def test_get_xblock_settings_fallback_warns(self):
+        """
+        get_xblock_settings() should emit a RuntimeWarning when it falls
+        back to DEFAULT_SETTINGS because XBLOCK_SETTINGS is not found in
+        Django settings.
+        """
+        with self.assertWarns(RuntimeWarning) as cm:
+            result = get_xblock_settings()
+
+        self.assertIs(result, DEFAULT_SETTINGS)
+        self.assertIn("falling back to defaults", str(cm.warning))
+
+    def test_get_xblock_settings_no_fallback(self):
+        """
+        get_xblock_settings() should not emit a warning when XBLOCK_SETTINGS
+        contains the stackamole key, and should return non-default settings.
+        """
+        xblock_settings = {
+            "stackamole": {
+                "sleep_timeout": 0,
+            }
+        }
+        with override_settings(XBLOCK_SETTINGS=xblock_settings):
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                result = get_xblock_settings()
+
+        self.assertEqual(result["sleep_timeout"], 0)
+        self.assertEqual(len(w), 0)
