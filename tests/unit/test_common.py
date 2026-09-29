@@ -13,6 +13,7 @@ from pymongo.errors import (
 )
 from stackamole.common import (
     DEFAULT_SETTINGS,
+    get_stack,
     get_xblock_settings,
     read_from_contentstore,
     ssh_to,
@@ -21,6 +22,7 @@ from stackamole.common import (
     RemoteExecTimeout,
     _
 )
+from stackamole.models import Stack
 
 from socket import timeout as SocketTimeout
 
@@ -339,3 +341,20 @@ class TestStackamoleCommon(TestCase):
 
         self.assertEqual(result["sleep_timeout"], 0)
         self.assertEqual(len(w), 0)
+
+    def test_get_stack_with_prop(self):
+        """
+        get_stack() should return the specified attribute when prop is set.
+        """
+        Stack.objects.create(
+            student_id="test_student",
+            course_id="test_course",
+            name="test_stack",
+            status="CREATE_COMPLETE",
+        )
+
+        with self.assertRaises(AttributeError):
+            get_stack(
+                "test_stack", "test_course", "test_student",
+                prop="example_property",
+            )
