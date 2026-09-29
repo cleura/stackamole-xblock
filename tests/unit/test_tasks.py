@@ -2360,12 +2360,10 @@ class TestGetProviderNotFound(TestCase):
                 self.providers = providers
 
             def get_provider(self, name):
-                try:
-                    provider = next(
-                        p for p in self.providers if p.name == name)
-                except StopIteration:
-                    provider = None
-                return provider
+                for p in self.providers:
+                    if p.name == name:
+                        return p
+                return None
 
         self.finder = ProviderFinder([
             type('FakeProvider', (), {'name': 'provider1'})(),
