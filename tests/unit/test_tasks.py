@@ -11,6 +11,7 @@ from stackamole.common import (
     update_stack,
     update_stack_fields,
     RemoteExecException,
+    RemoteExecTimeout,
 )
 from stackamole.tasks import (
     LaunchStackTask,
@@ -2298,6 +2299,26 @@ class TestCheckStudentProgressTask(StackamoleTestCase):
             "line 1\nline 2",
             "line 1\nline 2"
         ])
+
+    def test_check_student_progress_timeout(self):
+        # Setup
+        self.mocks["remote_exec"].side_effect = [
+            RemoteExecTimeout("test timed out")
+        ]
+        tests = ["test timeout"]
+        kwargs = {
+            "tests": tests,
+            "stack_ip": self.STACK_IP,
+            "stack_key": self.stack_key,
+            "stack_user_name": self.stack_user_name
+        }
+
+        # Run
+        res = CheckStudentProgressTask.run(**kwargs)
+
+        # Assertions
+        self.assertEqual(res["status"], "CHECK_PROGRESS_TIMEOUT")
+        self.assertTrue(res["error"])
 
 
 class StackamoleIPv6TestCase(StackamoleTestCase):
