@@ -342,6 +342,23 @@ class TestStackamoleCommon(TestCase):
         self.assertEqual(result["sleep_timeout"], 0)
         self.assertEqual(len(w), 0)
 
+    def test_get_xblock_settings_missing_key_warns(self):
+        """
+        get_xblock_settings() should emit a RuntimeWarning when XBLOCK_SETTINGS
+        exists on Django settings but does not contain the stackamole key.
+        """
+        xblock_settings = {
+            "other_key": {
+                "some_setting": True,
+            }
+        }
+        with override_settings(XBLOCK_SETTINGS=xblock_settings):
+            with self.assertWarns(RuntimeWarning) as cm:
+                result = get_xblock_settings()
+
+        self.assertIs(result, DEFAULT_SETTINGS)
+        self.assertIn("falling back to defaults", str(cm.warning))
+
     def test_get_stack_with_prop(self):
         """
         get_stack() should return the specified attribute when prop is set.
