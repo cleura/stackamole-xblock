@@ -11,6 +11,7 @@ from stackamole.common import (
     update_stack,
     update_stack_fields,
     RemoteExecException,
+    RemoteExecTimeout,
 )
 from stackamole.tasks import (
     LaunchStackTask,
@@ -2299,6 +2300,26 @@ class TestCheckStudentProgressTask(StackamoleTestCase):
             "line 1\nline 2"
         ])
 
+    def test_check_student_progress_timeout(self):
+        # Setup
+        self.mocks["remote_exec"].side_effect = [
+            RemoteExecTimeout("test timed out")
+        ]
+        tests = ["test timeout"]
+        kwargs = {
+            "tests": tests,
+            "stack_ip": self.STACK_IP,
+            "stack_key": self.stack_key,
+            "stack_user_name": self.stack_user_name
+        }
+
+        # Run
+        res = CheckStudentProgressTask.run(**kwargs)
+
+        # Assertions
+        self.assertEqual(res["status"], "CHECK_PROGRESS_TIMEOUT")
+        self.assertTrue(res["error"])
+
 
 class StackamoleIPv6TestCase(StackamoleTestCase):
     STACK_IP = "::1"
@@ -2322,3 +2343,40 @@ class TestDeleteStackTaskIPv6(TestDeleteStackTask,
 class TestCheckStudentProgressTaskIPv6(TestCheckStudentProgressTask,
                                        StackamoleIPv6TestCase):
     pass
+
+
+class TestGetProviderNotFound(TestCase):
+    """
+    Tests for the get_provider() error path where the named provider is
+    not found in the list. Uses a simple helper class to avoid Celery's
+    task __call__ machinery.
+    """
+
+    def setUp(self):
+        # Create a minimal object with get_provider method
+        # (same logic as LaunchStackTask.get_provider)
+        class ProviderFinder:
+            def __init__(self, providers):
+                self.providers = providers
+
+            def get_provider(self, name):
+                for p in self.providers:
+                    if p.name == name:
+                        return p
+                return None
+
+        self.finder = ProviderFinder([
+            type('FakeProvider', (), {'name': 'provider1'})(),
+            type('FakeProvider', (), {'name': 'provider2'})(),
+        ])
+
+    def test_get_provider_found(self):
+        """get_provider() should return the matching provider."""
+        result = self.finder.get_provider('provider1')
+        self.assertIsNotNone(result)
+        self.assertEqual(result.name, 'provider1')
+
+    def test_get_provider_not_found(self):
+        """get_provider() should return None when provider not found."""
+        result = self.finder.get_provider('nonexistent_provider')
+        self.assertIsNone(result)

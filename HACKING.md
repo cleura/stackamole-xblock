@@ -11,6 +11,16 @@ Follow [PEP 8](https://peps.python.org/pep-0008/).
 This repo uses [tox](https://tox.readthedocs.io/) for unit and integration tests.
 It does not install `tox` for you, you should follow [the installation instructions](https://tox.readthedocs.io/en/latest/install.html) if your local setup does not yet include `tox`.
 
+For a full test run, run just `tox`.
+
+To run specific unit test cases, you can invoke a specific test class or method in a testenv.
+
+For example:
+
+```bash
+tox -e py312-xblock60-celery5 -- tests.unit.test_common.TestStackamoleCommon.test_get_xblock_settings_no_fallback
+```
+
 You are encouraged to set up your checkout such that the tests run on every commit, and on every push.
 To do so, run the following command after checking out this repository:
 

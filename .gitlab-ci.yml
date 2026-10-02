@@ -1,10 +1,11 @@
 image: python
+before_script:
+  - pip install tox
 
 py311:
   image: python:3.11
   stage: build
   script:
-    - pip install tox
     - tox -e py311-flake8,py311-pipdeptree,py311-pipdeptree-requirements,py311-xblock50-celery5
   artifacts:
     paths:
@@ -15,7 +16,6 @@ py312:
   image: python:3.12
   stage: build
   script:
-    - pip install tox
     - tox -e py312-flake8,py312-pipdeptree,py312-pipdeptree-requirements,py312-xblock50-celery5,py312-xblock60-celery5
   artifacts:
     paths:
@@ -25,10 +25,7 @@ py312:
 coverage:
   stage: test
   script:
-    - pip install coverage
-    - python -m coverage combine
-    - python -m coverage html
-    - python -m coverage report
+    - tox -e coverage
     - mv htmlcov public
   coverage: '/TOTAL.*\s+(\d+\.\d+%)$/'
   artifacts:
