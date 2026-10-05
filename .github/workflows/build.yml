@@ -66,5 +66,3 @@ jobs:
         name: htmlcov
         path: htmlcov
         retention-days: 7
-    - name: Upload to codecov
-      uses: codecov/codecov-action@v4
