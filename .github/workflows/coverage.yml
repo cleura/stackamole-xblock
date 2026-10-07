@@ -5,7 +5,7 @@ name: Post coverage comment
 
 on:  # zizmor: ignore[dangerous-triggers] We're using workflow_run to post a coverage comment on external PRs. This is safe because we don't checkout the external code or interact with the external code in any way but extracting an artifact containing the comment to post, and post it.
   workflow_run:
-    workflows: ["CI"]
+    workflows: ["Python package"]
     types:
       - completed
 
