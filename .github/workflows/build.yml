@@ -66,3 +66,7 @@ jobs:
         name: htmlcov
         path: htmlcov
         retention-days: 7
+    - name: Add coverage comment
+      uses: py-cov-action/python-coverage-comment-action@v4.5
+      with:
+        GITHUB_TOKEN: ${{ github.token }}
