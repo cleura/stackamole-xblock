@@ -4,6 +4,7 @@ import time
 import uuid
 import paramiko
 import logging
+import warnings
 import six
 
 from io import StringIO
@@ -219,22 +220,27 @@ class RemoteExecTimeout(RemoteExecException):
     pass
 
 
-if sys.version_info < (3,):
-    def b(x):
-        return x
-else:
-    import codecs
-
-    def b(x):
-        return codecs.latin_1_encode(x)[0]
+def b(x):
+    return x.encode("latin-1")
 
 
 def get_xblock_settings():
     try:
         xblock_settings = django_settings.XBLOCK_SETTINGS
     except AttributeError:
+        warnings.warn(
+            "XBLOCK_SETTINGS not found in Django settings, "
+            "falling back to defaults",
+            RuntimeWarning,
+        )
         settings = DEFAULT_SETTINGS
     else:
+        if SETTINGS_KEY not in xblock_settings:
+            warnings.warn(
+                f'"{SETTINGS_KEY}" not found in XBLOCK_SETTINGS, '
+                "falling back to defaults",
+                RuntimeWarning,
+            )
         settings = xblock_settings.get(
             SETTINGS_KEY, DEFAULT_SETTINGS)
 
