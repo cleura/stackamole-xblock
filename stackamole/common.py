@@ -163,6 +163,7 @@ DEFAULT_SETTINGS = {
     "terminal_font_size": "10",
     "instructions_layout": "above",
     "enable_fullscreen": False,
+    "enable_admin_notifications": True,
     "launch_timeout": 900,
     "remote_exec_timeout": 300,
     "suspend_timeout": 120,

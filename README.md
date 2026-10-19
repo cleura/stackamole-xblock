@@ -76,6 +76,7 @@ Running this XBlock with Tutor (for Open edX Maple and later) requires two steps
      delete_task_timeout: 900
      guacamole_js_version: 1.5.5
      enable_fullscreen: false
+     enable_admin_notifications: true
      instructions_layout: above
      js_timeouts:
        check: 5000
@@ -173,6 +174,8 @@ This is a brief explanation of each:
 * `enable_fullscreen`: An option to allow learners to launch a lab in fullsceen mode, in a separate browser window.
   (Default: `false`)
 
+* `enable_admin_notifications`: An option to notify `Django ADMINS` when there are no providers available for a course.
+  (Default: `true`)
 * `lab_resize_method`: A [display setting](https://guacamole.apache.org/doc/1.5.5/gug/configuring-guacamole.html#rdp-display-settings) for RDP connections to update the RDP server when the width and height of the client display changes.
   Possible values are:
 

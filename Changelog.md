@@ -1,3 +1,8 @@
+Unreleased
+-------------------------
+
+* [Enhancement] Notify admins via email, when a learner hits the "There are no providers available" error.
+
 Version 9.4.0 (2026-09-01)
 -------------------------
 

@@ -19,7 +19,10 @@ from xblock.scorable import ScorableXBlockMixin, Score
 from xblock.validation import ValidationMessage
 
 from distutils.util import strtobool
+from django.conf import settings as django_settings
+from django.core.mail import mail_admins
 from django.db import transaction
+from django.urls import reverse
 from django.utils import timezone, translation
 from lxml import etree
 
@@ -33,6 +36,7 @@ from .common import (
     PENDING_STATES,
     LAUNCH_PENDING,
     LAUNCH_ERROR,
+    CREATE_FAILED,
     SETTINGS_KEY,
     get_xblock_settings,
     get_stack,
@@ -594,6 +598,13 @@ class StackamoleXBlock(XBlock,
 
         return stack_name
 
+    def get_block_url(self):
+        usage_key = self.scope_ids.usage_id
+        path = reverse("jump_to", kwargs={
+            "course_id": str(usage_key.course_key),
+            "location": str(usage_key)})
+        return f"{django_settings.LMS_ROOT_URL}{path}"
+
     def get_js_urls(self):
         """
         Returns a dict of urls for the Javascript files.
@@ -1007,8 +1018,23 @@ class StackamoleXBlock(XBlock,
             except LaunchError as e:
                 stack.status = LAUNCH_ERROR
                 stack.error_msg = e.error_msg
+        elif stack.status == CREATE_FAILED \
+                and "no providers available" in stack.error_msg:
+            admin_notifications = settings.get(
+                "enable_admin_notifications", True)
+            lab_url = self.get_block_url()
+            message = (f"Learner '{stack.learner.email}' "
+                       f"failed to launch a stack for '{course_id}'. \n"
+                       f"XBlock URL : {lab_url}")
+            logger.error(message)
+            # notify ADMINS that there are no providers available,
+            # if notifications are enabled.
+            if admin_notifications:
+                mail_admins(
+                    subject=f"No providers available for : '{course_id}'",
+                    message=message)
         else:
-            # Detected a failed stack.  Report the error and let the user retry
+            # Detected a failed stack. Report the error and let the user retry
             # manually.
             logger.error("Failed stack [%s] detected with status [%s]." %
                          (self.stack_name, stack.status))
