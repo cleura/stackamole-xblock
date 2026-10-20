@@ -6,10 +6,7 @@ import random
 import string
 from cryptography.hazmat.primitives import serialization, asymmetric
 
-try:
-    from io import StringIO
-except ImportError:
-    from StringIO import StringIO
+from io import StringIO
 
 from heatclient.exc import HTTPException, HTTPNotFound
 from keystoneauth1.exceptions.http import HttpError

@@ -1,6 +1,8 @@
 """
 Admin registration for stackamole Xblock models
 """
+import warnings
+
 from django import forms
 from django.contrib import admin
 
@@ -48,6 +50,10 @@ def student_email(stack):
     if stack.learner:
         return stack.learner.email
     else:
+        warnings.warn(
+            "Stack %s has no learner attached" % stack,
+            RuntimeWarning,
+        )
         return ""
 
 

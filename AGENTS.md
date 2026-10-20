@@ -26,7 +26,10 @@ Prefer `.ai/tmp/` over the system temp directory.
 ## Tooling
 
 ### Tests
+
 Entry point is **`tox`**.
+
+See also the "How to run tests" section in [HACKING.md](HACKING.md).
 
 ## Changelog
 

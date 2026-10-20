@@ -281,12 +281,10 @@ class LaunchStackTask(StackamoleTask):
         self.update_stack(stack_data)
 
     def get_provider(self, name):
-        try:
-            provider = next(p for p in self.providers if p.name == name)
-        except StopIteration:
-            provider = None
-
-        return provider
+        for p in self.providers:
+            if p.name == name:
+                return p
+        return None
 
     def launch_stack(self, provider_name=None):
         """

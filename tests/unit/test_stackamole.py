@@ -1662,3 +1662,365 @@ class TestStackamoleXBlock(TestCase):
         self.block.enable_fullscreen = "false"
         enable_fullscreen = self.block.get_enable_fullscreen(settings)
         self.assertEqual(False, enable_fullscreen)
+
+
+class TestStackamoleXBlockErrorPaths(TestCase):
+    """
+    Tests for error/exception paths in StackamoleXBlock that were not
+    previously covered.
+    """
+
+    def _make_block_from_file(self, block_id):
+        """Helper to parse an XML file and return a StackamoleXBlock."""
+        block_type = 'stackamole'
+        self.runtime.resources_fs = OSFS('tests/resources/course')
+        def_id = self.runtime.id_generator.create_definition(block_type)
+        usage_id = self.runtime.id_generator.create_usage(def_id)
+        scope_ids = ScopeIds('user', block_type, def_id, usage_id)
+
+        fake_location = Mock()
+        fake_location.block_id = block_id
+        self.runtime.id_generator = Mock()
+        self.runtime.id_generator.create_definition = Mock(
+            return_value=fake_location)
+
+        node = etree.Element(block_type)
+        node.set('filename', block_id)
+        block = StackamoleXBlock.parse_xml(
+            node, self.runtime, scope_ids)
+        return block, scope_ids
+
+    def setUp(self):
+        self.runtime = WorkbenchRuntime()
+        self.scope_ids = ScopeIds(
+            'user', 'stackamole', 'def_id', 'usage_id')
+        # Set up mock resources_fs so parse_xml can find the XML file
+        self.runtime.resources_fs = OSFS('tests/resources/course')
+
+    def test_validate_hastexo_block_type_warning(self):
+        """
+        validate() should produce a warning when block_type is 'hastexo'.
+        """
+        block = self.runtime.construct_xblock_from_class(
+            StackamoleXBlock, self.scope_ids)
+
+        # Simulate a hastexo block type
+        block.scope_ids = Mock(block_type='hastexo')
+
+        validation = block.validate()
+        messages = [
+            msg.text for msg in validation.messages
+        ]
+        # Should contain the deprecation warning
+        self.assertTrue(
+            any('hastexo' in msg for msg in messages)
+        )
+
+    def test_validate_normal_block_no_warning(self):
+        """
+        validate() should produce no hastexo-specific warning for
+        normal 'stackamole' block types.
+        """
+        block = self.runtime.construct_xblock_from_class(
+            StackamoleXBlock, self.scope_ids)
+
+        validation = block.validate()
+        messages = [
+            msg.text for msg in validation.messages
+        ]
+        # Should not contain the hastexo warning
+        self.assertFalse(
+            any('hastexo' in msg for msg in messages)
+        )
+
+    def test_parse_xml_file_not_found(self):
+        """
+        parse_xml() should raise FileNotFoundError when the referenced
+        XML file does not exist.
+        """
+        block_type = 'stackamole'
+        fake_location = Mock()
+        fake_location.block_id = 'nonexistent/lab'
+        id_generator = Mock()
+        id_generator.create_definition = Mock(
+            return_value=fake_location)
+
+        node = etree.Element(block_type)
+        node.set('filename', 'nonexistent_file')
+
+        mock_runtime = Mock()
+        mock_runtime.resources_fs.exists = Mock(return_value=False)
+        mock_runtime.id_generator = id_generator
+
+        with self.assertRaises(FileNotFoundError) as ctx:
+            StackamoleXBlock.parse_xml(
+                node, mock_runtime, self.scope_ids)
+
+        self.assertIn('nonexistent_file.xml', str(ctx.exception))
+
+    def test_parse_xml_unknown_tag(self):
+        """
+        parse_xml() should log a warning for unknown XML tags in the
+        file-based parsing path.
+        """
+        block_type = 'stackamole'
+        block_id = 'fake_lab_unknown_tag'
+
+        # We need to create a temporary test XML file with an unknown tag
+        # Use the existing course resources directory
+        temp_dir = 'tests/resources/course'
+        fake_location = Mock()
+        fake_location.block_id = block_id
+        id_generator = Mock()
+        id_generator.create_definition = Mock(return_value=fake_location)
+
+        # Create the XML file with an unknown tag
+        xml_content = textwrap.dedent("""\
+        <stackamole
+          stack_template_path='hot_lab.yaml'
+          stack_user_name='training'>
+          <unknown_tag>some content</unknown_tag>
+        </stackamole>
+        """)
+        filepath = os.path.join(temp_dir, 'stackamole',
+                                block_id.replace(':', '/') + '.xml')
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w') as f:
+            f.write(xml_content)
+
+        try:
+            node = etree.Element(block_type)
+            node.set('filename', block_id)
+
+            self.runtime.resources_fs = OSFS(temp_dir)
+            self.runtime.id_generator = id_generator
+
+            scope_ids = ScopeIds(
+                'user', block_type, 'def_id', 'usage_id')
+
+            with self.assertLogs(
+                    'stackamole.stackamole', level='WARNING'
+            ) as cm:
+                block = StackamoleXBlock.parse_xml(
+                    node, self.runtime, scope_ids)
+                self.assertIsInstance(block, StackamoleXBlock)
+                self.assertTrue(
+                    any('Unknown attribute' in record.message
+                        for record in cm.records)
+                )
+        finally:
+            # Clean up the temporary file
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            # Clean up the stackamole dir if empty
+            stackamole_dir = os.path.join(temp_dir, 'stackamole')
+            if os.path.exists(stackamole_dir):
+                try:
+                    os.rmdir(stackamole_dir)
+                except OSError:
+                    pass
+
+    def test_launch_stack_task(self):
+        """
+        launch_stack_task() should call LaunchStackTask.apply_async with
+        the correct time limits.
+        """
+        from stackamole.tasks import LaunchStackTask
+
+        block, _ = self._make_block_from_file('fake_lab_1')
+
+        block.stack_user_name = 'training'
+        block.stack_run = 'test_run'
+        block.hook_script = ''
+        block.hook_events = {}
+        block.stack_protocol = 'ssh'
+        block.providers = [{"name": "provider1", "capacity": -1}]
+        block.provider = ''
+
+        with patch.object(
+                LaunchStackTask, 'apply_async',
+                return_value=Mock(id='task_123')) as mock_apply:
+            with patch.object(
+                    block, 'get_launch_timeout', return_value=300):
+                result = block.launch_stack_task({}, {"stack_id": "1"})
+                mock_apply.assert_called_once()
+                # Verify it was called with the correct kwargs
+                call_kwargs = mock_apply.call_args
+                self.assertEqual(
+                    call_kwargs.kwargs['kwargs']['stack_id'], '1')
+                self.assertIsInstance(result, Mock)
+
+    def test_launch_stack_task_result(self):
+        """
+        launch_stack_task_result() should return an AsyncResult wrapper.
+        """
+        from stackamole.tasks import LaunchStackTask
+
+        with patch.object(
+                LaunchStackTask, 'AsyncResult',
+                return_value=Mock(id='result_456')) as mock_async:
+            block, _ = self._make_block_from_file('fake_lab_1')
+
+            result = block.launch_stack_task_result('task_123')
+            mock_async.assert_called_once_with('task_123')
+            self.assertIsInstance(result, Mock)
+
+    def test_set_port(self):
+        """
+        set_port() should update the stack's port in the database.
+        """
+        from stackamole.models import Stack
+        from django.contrib.auth.models import User
+        from webob import Request
+
+        learner, _ = User.objects.get_or_create(
+            username='set_port_user',
+            email='set_port@example.com'
+        )
+        Stack.objects.filter(
+            student_id='set_port_student',
+            course_id='set_port_course',
+        ).delete()
+
+        stack, _ = Stack.objects.get_or_create(
+            student_id='set_port_student',
+            course_id='set_port_course',
+            learner=learner,
+            name='port_test_stack',
+            status='CREATE_COMPLETE',
+            port=3389,
+        )
+
+        block, _ = self._make_block_from_file('fake_lab_1')
+        block.stack_name = 'port_test_stack'
+        block.stack_user_name = 'training'
+
+        # Mock get_block_ids since it relies on the runtime which isn't
+        # fully set up in tests
+        with patch.object(block, 'get_block_ids',
+                          return_value=(
+                              'set_port_course', 'set_port_student')):
+            # set_port is decorated with @XBlock.json_handler, which expects
+            # a Request object with a body containing JSON data
+            request = Request.blank('/')
+            request.method = 'POST'
+            request.body = json.dumps({'port': 8080}).encode('utf-8')
+
+            block.set_port(request)
+
+            # Verify the stack's port was updated
+            stack.refresh_from_db()
+            self.assertEqual(stack.port, 8080)
+
+    def test_check_progress_task(self):
+        """
+        check_progress_task() should call
+        CheckStudentProgressTask.apply_async with the correct parameters.
+        """
+        from stackamole.tasks import CheckStudentProgressTask
+
+        block, _ = self._make_block_from_file('fake_lab_1')
+
+        block.tests = ['test script']
+
+        with patch.object(
+                CheckStudentProgressTask, 'apply_async',
+                return_value=Mock(id='check_789')) as mock_apply:
+            result = block.check_progress_task(
+                300,
+                tests=['test'],
+                stack_ip='127.0.0.1',
+                stack_user_name='training',
+                stack_key='key',
+            )
+            mock_apply.assert_called_once()
+            self.assertEqual(result.id, 'check_789')
+
+    def test_check_progress_task_result(self):
+        """
+        check_progress_task_result() should return an AsyncResult wrapper.
+        """
+        from stackamole.tasks import CheckStudentProgressTask
+
+        with patch.object(
+                CheckStudentProgressTask, 'AsyncResult',
+                return_value=Mock(id='check_result')) as mock_async:
+            block, _ = self._make_block_from_file('fake_lab_1')
+
+            block.check_progress_task_result('check_789')
+            mock_async.assert_called_once_with('check_789')
+
+    def test_has_submitted_answer(self):
+        """
+        has_submitted_answer() should return True when a score is set.
+        """
+        block, _ = self._make_block_from_file('fake_lab_1')
+
+        # No score set yet
+        self.assertFalse(block.has_submitted_answer())
+
+        # Set a score
+        from xblock.scorable import Score
+        block.set_score(Score(0.8, 1.0))
+
+        self.assertTrue(block.has_submitted_answer())
+
+    def test_get_score_no_score(self):
+        """
+        get_score() should return None and log a warning when no score
+        has been earned yet.
+        """
+        block, _ = self._make_block_from_file('fake_lab_1')
+
+        # No score set yet
+        with self.assertLogs('stackamole.stackamole', level='WARNING') as cm:
+            result = block.get_score()
+            self.assertIsNone(result)
+            self.assertTrue(
+                any('No score' in record.message for record in cm.records)
+            )
+
+    def test_get_score_with_score(self):
+        """
+        get_score() should return a Score when one is set.
+        """
+        from xblock.scorable import Score
+
+        block, _ = self._make_block_from_file('fake_lab_1')
+
+        block.set_score(Score(0.5, 1.0))
+        score = block.get_score()
+
+        self.assertIsInstance(score, Score)
+        self.assertEqual(score.raw_earned, 0.5)
+        self.assertEqual(score.raw_possible, 1.0)
+
+    def test_calculate_score(self):
+        """
+        calculate_score() should return the stored score.
+        """
+        from xblock.scorable import Score
+
+        block, _ = self._make_block_from_file('fake_lab_1')
+
+        # With no score, should return None
+        self.assertIsNone(block.calculate_score())
+
+        # With a score, should return the stored Score
+        block.set_score(Score(0.75, 1.0))
+        score = block.calculate_score()
+        self.assertIsInstance(score, Score)
+        self.assertEqual(score.raw_earned, 0.75)
+
+    def test_workbench_scenarios(self):
+        """
+        workbench_scenarios() should return a list with one scenario tuple.
+        """
+        scenarios = StackamoleXBlock.workbench_scenarios()
+        self.assertIsInstance(scenarios, list)
+        self.assertEqual(len(scenarios), 1)
+        scenario = scenarios[0]
+        self.assertEqual(len(scenario), 2)
+        self.assertEqual(scenario[0], "StackamoleXBlock")
+        self.assertIsInstance(scenario[1], str)
+        self.assertIn('<stackamole/>', scenario[1])

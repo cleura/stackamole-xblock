@@ -398,7 +398,11 @@ class StackamoleXBlock(XBlock,
         # Temporary step while migrating courses from hastexo to stackamole
         # module. To be removed together with the hastexo entry point.
         block_type = self.scope_ids.block_type
-        if block_type == "hastexo":
+
+        # There is no way to properly test this in unit tests without
+        # access to a real modulestore, hence the "no cover" pragma
+        # for coverage.
+        if block_type == "hastexo":  # pragma: no cover
             from xmodule.modulestore.django import modulestore
             course_key = self.scope_ids.usage_id.course_key
 
@@ -801,10 +805,7 @@ class StackamoleXBlock(XBlock,
             if configured_providers.get("default"):
                 provider_name = "default"
             else:
-                try:
-                    provider_name = next(iter(configured_providers))
-                except StopIteration:
-                    pass
+                provider_name = next(iter(configured_providers), None)
 
             if not provider_name:
                 raise Exception("Provider not configured for [%s]." %

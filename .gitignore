@@ -5,6 +5,9 @@
 var/
 dist/
 .coverage
+.coverage.*
+htmlcov/
+coverage.xml
 .tox/
 .ai/
 CLAUDE.md

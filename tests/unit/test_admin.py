@@ -20,7 +20,7 @@ try:
     from common.djangoapps.student.models import AnonymousUserId
 except RuntimeError:
     from student.models import AnonymousUserId
-from stackamole.admin import StackAdmin
+from stackamole.admin import StackAdmin, student_email
 from stackamole.models import Stack, StackLog
 
 
@@ -168,3 +168,21 @@ class TestStackamoleStackAdmin(TestCase):
 
         logs = StackLog.objects.filter(stack_id=self.stack.id)
         self.assertEqual(logs.count(), 0)
+
+    def test_student_email_no_learner_warns(self):
+        """
+        student_email() should emit a RuntimeWarning when the stack's
+        learner is falsy.
+        """
+        stack = Stack.objects.create(
+            student_id=self.student_id,
+            course_id=self.course_id,
+            name="test_stack_no_learner",
+            learner=None,
+        )
+
+        with self.assertWarns(RuntimeWarning) as cm:
+            result = student_email(stack)
+
+        self.assertEqual(result, "")
+        self.assertIn("no learner attached", str(cm.warning))

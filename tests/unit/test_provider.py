@@ -458,6 +458,52 @@ class TestOpenstackProvider(TestCase):
             provider.create_stack(
                 self.stack_name, self.stack_run, key_type="")
 
+    def test_create_stack_http_500_on_get(self):
+        """
+        create_stack() should raise ProviderException when heat_c.stacks.get()
+        returns an HTTP 500 error during the polling loop.
+        """
+        # Setup
+        heat = self.get_heat_client_mock()
+        heat.stacks.create.side_effect = [
+            {"stack": {"id": self.stack_name}}
+        ]
+        # First get() returns IN_PROGRESS, second get() in polling loop
+        # raises HTTP 500
+        heat.stacks.get.side_effect = [
+            self.stacks["CREATE_IN_PROGRESS"],
+            heat_exc.HTTPInternalServerError
+        ]
+
+        # Run
+        with self.assertRaises(ProviderException):
+            provider = Provider.init(self.provider_name)
+            provider.set_template(self.stack_template)
+            provider.create_stack(
+                self.stack_name, self.stack_run, key_type="")
+
+    def test_create_stack_http_500_on_first_get(self):
+        """
+        create_stack() should raise ProviderException when heat_c.stacks.get()
+        returns an HTTP 500 error on the first call after stack creation.
+        """
+        # Setup
+        heat = self.get_heat_client_mock()
+        heat.stacks.create.side_effect = [
+            {"stack": {"id": self.stack_name}}
+        ]
+        # First (and only) get() call raises HTTP 500
+        heat.stacks.get.side_effect = [
+            heat_exc.HTTPInternalServerError
+        ]
+
+        # Run
+        with self.assertRaises(ProviderException):
+            provider = Provider.init(self.provider_name)
+            provider.set_template(self.stack_template)
+            provider.create_stack(
+                self.stack_name, self.stack_run, key_type="")
+
     def test_create_stack_not_found_on_get(self):
         # Setup
         heat = self.get_heat_client_mock()
@@ -845,3 +891,151 @@ class TestOpenstackProvider(TestCase):
         self.assertRaises(KeyError, lambda: provider_stack["outputs"])
         heat.stacks.delete.assert_called_with(stack_id=self.stack_name)
         nova.keypairs.delete.assert_called_with(self.stack_name)
+
+
+class TestProviderBaseClass(TestCase):
+    """
+    Tests for error/exception paths in the base Provider class that were
+    not previously covered.
+    """
+
+    def setUp(self):
+        self.settings = {
+            "sleep_timeout": 0,
+            "providers": {
+                "test_provider": {
+                    "type": "openstack",
+                    "os_auth_url": "http://example.com",
+                    "os_username": "test",
+                    "os_password": "test",
+                }
+            }
+        }
+        self.patcher = patch.dict("stackamole.common.DEFAULT_SETTINGS",
+                                  self.settings)
+        self.patcher.start()
+        self.addCleanup(self.patcher.stop)
+
+    def test_set_logger(self):
+        """
+        set_logger() should allow replacing the default logger.
+        """
+        custom_logger = Mock()
+        provider = Provider.init("test_provider")
+        provider.set_logger(custom_logger)
+        self.assertIs(provider.logger, custom_logger)
+
+    def test_set_capacity_none(self):
+        """
+        set_capacity() should set capacity to -1 when given None.
+        """
+        provider = Provider.init("test_provider")
+        provider.set_capacity(None)
+        self.assertEqual(provider.capacity, -1)
+
+    def test_set_capacity_string_none(self):
+        """
+        set_capacity() should set capacity to -1 when given 'None' string.
+        """
+        provider = Provider.init("test_provider")
+        provider.set_capacity("None")
+        self.assertEqual(provider.capacity, -1)
+
+    def test_set_capacity_invalid(self):
+        """
+        set_capacity() should set capacity to 0 when given an invalid value.
+        """
+        provider = Provider.init("test_provider")
+        provider.set_capacity("invalid")
+        self.assertEqual(provider.capacity, 0)
+
+    def test_set_capacity_valid(self):
+        """
+        set_capacity() should accept a valid integer string.
+        """
+        provider = Provider.init("test_provider")
+        provider.set_capacity("42")
+        self.assertEqual(provider.capacity, 42)
+
+    def test_set_capacity_type_error(self):
+        """
+        set_capacity() should handle TypeError from int() conversion.
+        """
+        provider = Provider.init("test_provider")
+        provider.set_capacity(object())
+        self.assertEqual(provider.capacity, 0)
+
+    def test_set_template_no_template(self):
+        """
+        set_template() should raise ProviderException when no template
+        is provided.
+        """
+        provider = Provider.init("test_provider")
+        with self.assertRaises(ProviderException):
+            provider.set_template(None)
+
+        with self.assertRaises(ProviderException):
+            provider.set_template("")
+
+    def test_set_environment_no_environment(self):
+        """
+        set_environment() should raise ProviderException when no
+        environment is provided.
+        """
+        provider = Provider.init("test_provider")
+        with self.assertRaises(ProviderException):
+            provider.set_environment(None)
+
+        with self.assertRaises(ProviderException):
+            provider.set_environment("")
+
+    def test_generate_key_pair_base64_encoded(self):
+        """
+        generate_key_pair() with encodeb64=True should return a base64-encoded
+        private key as bytes.
+        """
+        import base64
+        provider = Provider.init("test_provider")
+        keypair = provider.generate_key_pair(encodeb64=True, key_type='rsa')
+        # The private key should be base64-encoded bytes
+        self.assertIsInstance(keypair['private_key'], bytes)
+        # It should be decodable as base64
+        decoded = base64.b64decode(keypair['private_key'])
+        self.assertIn(b'RSA', decoded)
+
+    def test_generate_random_password(self):
+        """
+        generate_random_password() should return a lowercase alpha string
+        of the given length.
+        """
+        import string
+        provider = Provider.init("test_provider")
+        password = provider.generate_random_password(10)
+        self.assertEqual(len(password), 10)
+        self.assertTrue(password.isspace() is False)
+        self.assertTrue(password.islower())
+        self.assertTrue(all(c in string.ascii_lowercase for c in password))
+
+    def test_set_template_valid(self):
+        """
+        set_template() should accept a valid template string.
+        """
+        provider = Provider.init("test_provider")
+        provider.set_template("valid_template_content")
+        self.assertEqual(provider.template, "valid_template_content")
+
+    def test_set_environment_valid(self):
+        """
+        set_environment() should accept a valid environment string.
+        """
+        provider = Provider.init("test_provider")
+        provider.set_environment("valid_env_content")
+        self.assertEqual(provider.environment, "valid_env_content")
+
+    def test_init_empty_config(self):
+        """
+        Provider.__init__() should raise ProviderException when given an
+        empty config dictionary.
+        """
+        with self.assertRaises(ProviderException):
+            _ = Provider("test_provider", {}, 0)
