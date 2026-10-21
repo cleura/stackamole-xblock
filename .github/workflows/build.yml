@@ -11,12 +11,13 @@ jobs:
       matrix:
         python-version:
           - '3.11'
+          - '3.12'
+          - '3.13'
         pip-version:
-          - 23.0.1
-          - 23.2.1
+          - '24.0'
         include:
-          - python-version: '3.12'
-            pip-version: '23.2.1'
+          - python-version: '3.14'
+            pip-version: '25.3'
 
     steps:
     - name: Check out code
