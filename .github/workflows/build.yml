@@ -13,11 +13,9 @@ jobs:
           - '3.11'
           - '3.12'
           - '3.13'
+          - '3.14'
         pip-version:
-          - '24.0'
-        include:
-          - python-version: '3.14'
-            pip-version: '25.3'
+          - '26.2.2'
 
     steps:
     - name: Check out code
