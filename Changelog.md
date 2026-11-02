@@ -1,4 +1,4 @@
-Unreleased
+Version 9.5.1 (2026-11-02)
 -------------------------
 
 * [Chore] Bump the pip version for GH Actions test run.
